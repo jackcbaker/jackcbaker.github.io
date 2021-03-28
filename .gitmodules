@@ -1,0 +1,12 @@
+[submodule "themes/contrast"]
+	path = themes/contrast
+	url = https://github.com/niklasbuschmann/contrast-hugo.git
+[submodule "themes/mini"]
+	path = themes/mini
+	url = https://github.com/nodejh/hugo-theme-mini.git
+[submodule "themes/paper"]
+	path = themes/paper
+	url = https://github.com/nanxiaobei/hugo-paper.git
+[submodule "themes/coder"]
+	path = themes/coder
+	url = https://github.com/luizdepra/hugo-coder.git
