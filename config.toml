@@ -3,6 +3,7 @@ title = "Jack Baker"
 theme = "coder"
 languageCode = "en"
 defaultContentLanguage = "en"
+publishDir = "docs"
 paginate = 20
 pygmentsStyle = "bw"
 pygmentsCodeFences = true

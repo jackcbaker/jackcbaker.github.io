@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Jack Baker</title>
-    <link>http://jackcbaker.github.io/posts/</link>
-    <description>Recent content in Posts on Jack Baker</description>
+    <title>development on Jack Baker</title>
+    <link>http://jackcbaker.github.io/tags/development/</link>
+    <description>Recent content in development on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 06 Apr 2021 18:29:47 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 06 Apr 2021 18:29:47 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/tags/development/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>How to include libraries in your project while also editing them</title>
       <link>http://jackcbaker.github.io/posts/include-libraries-project-editing/</link>
