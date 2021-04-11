@@ -6,7 +6,16 @@
     <description>Recent content on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 06 Apr 2021 18:29:47 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/authors/jack-baker/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 11 Apr 2021 15:36:34 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/authors/jack-baker/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How to tell your data science pipeline is actually working?</title>
+      <link>http://jackcbaker.github.io/posts/check-data-science-pipeline-working/</link>
+      <pubDate>Sun, 11 Apr 2021 15:36:34 +0100</pubDate>
+      
+      <guid>http://jackcbaker.github.io/posts/check-data-science-pipeline-working/</guid>
+      <description>I&amp;rsquo;ve been there - studying model output for hours to check a model is working. There&amp;rsquo;s some better ways than this. For example designing backtests to check a model does better than a baseline. The trouble with these methods is they don&amp;rsquo;t categorically show that a model doing exactly as it is designed to do; they&amp;rsquo;re also not automated, or (as with a backtest) are expensive to run; and sometimes they&amp;rsquo;re harder to design than the model itself!</description>
+    </item>
+    
     <item>
       <title>How to include libraries in your project while also editing them</title>
       <link>http://jackcbaker.github.io/posts/include-libraries-project-editing/</link>
