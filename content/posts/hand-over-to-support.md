@@ -1,7 +1,7 @@
 +++ 
 draft = false
 date = 2021-04-17T15:36:34+01:00
-title = "How to move your data science solution into a hands off state?"
+title = "How to move your data science solution into a hands off state"
 description = "Once you've developed a data science solution it's often easy to tinker with it indefinitely. This is not ideal - you want to free up your time to develop new solutions and give further value to a business. In this post I give some tips to make a data science solution easier to leave in a hands off state."
 slug = "data-science-solution-to-hands-off-state"
 authors = ["Jack Baker"]
