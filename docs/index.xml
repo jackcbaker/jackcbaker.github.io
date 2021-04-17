@@ -6,7 +6,16 @@
     <description>Recent content on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 11 Apr 2021 15:36:34 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 17 Apr 2021 15:36:34 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How to move your data science solution into a hands off state?</title>
+      <link>http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/</link>
+      <pubDate>Sat, 17 Apr 2021 15:36:34 +0100</pubDate>
+      
+      <guid>http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/</guid>
+      <description>Once you&amp;rsquo;ve developed a data science solution it&amp;rsquo;s easy to tinker with it indefinitely: running it manually, making small changes to the output, iterating on the model. This is not ideal - once you have a solution you&amp;rsquo;re happy with ideally you should be able to leave it running with minimal input from you, unless something falls over. Whether you&amp;rsquo;re handing over to a support team, or will be supporting the tool yourself, this post gives some tips when you&amp;rsquo;re trying to move your solution into a hands-off state - or putting it into production.</description>
+    </item>
+    
     <item>
       <title>How to tell your data science pipeline is actually working?</title>
       <link>http://jackcbaker.github.io/posts/check-data-science-pipeline-working/</link>

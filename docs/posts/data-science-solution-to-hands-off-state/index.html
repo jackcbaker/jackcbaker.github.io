@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="color-scheme" content="light dark">
+
+    
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; block-all-mixed-content; default-src 'self'; child-src 'self'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net/; form-action 'self'; frame-src 'self'; img-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/ https://cdn.jsdelivr.net/; script-src 'self' 'unsafe-inline' https://www.google-analytics.com; prefetch-src 'self';">
+    
+
+    <meta name="author" content="Jack Baker">
+    <meta name="description" content="Once you&#39;ve developed a data science solution it&#39;s often easy to tinker with it indefinitely. This is not ideal - you want to free up your time to develop new solutions and give further value to a business. In this post I give some tips to make a data science solution easier to leave in a hands off state.">
+    <meta name="keywords" content="blog,data science">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="How to move your data science solution into a hands off state?"/>
+<meta name="twitter:description" content="Once you&#39;ve developed a data science solution it&#39;s often easy to tinker with it indefinitely. This is not ideal - you want to free up your time to develop new solutions and give further value to a business. In this post I give some tips to make a data science solution easier to leave in a hands off state."/>
+
+    <meta property="og:title" content="How to move your data science solution into a hands off state?" />
+<meta property="og:description" content="Once you&#39;ve developed a data science solution it&#39;s often easy to tinker with it indefinitely. This is not ideal - you want to free up your time to develop new solutions and give further value to a business. In this post I give some tips to make a data science solution easier to leave in a hands off state." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-04-17T15:36:34&#43;01:00" />
+<meta property="article:modified_time" content="2021-04-17T15:36:34&#43;01:00" />
+
+
+
+    <title>
+  How to move your data science solution into a hands off state? · Jack Baker
+</title>
+
+    
+      <link rel="canonical" href="http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/">
+    
+
+    <link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.1.7" as="font" type="font/woff2" crossorigin>
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.eb7743f94930acfd17146aecc1f80e86fe35b3e451f2ec0c98485f9c4d962f34.css" integrity="sha256-63dD&#43;UkwrP0XFGrswfgOhv41s&#43;RR8uwMmEhfnE2WLzQ=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.dde8a61eb31a32353b4baf3d9113f03c4ea2a8ca9bb736f59ca2d2b2cb664f0b.css" integrity="sha256-3eimHrMaMjU7S689kRPwPE6iqMqbtzb1nKLSsstmTws=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+
+    <meta name="generator" content="Hugo 0.82.0" />
+  </head>
+
+  
+  
+    
+  
+  <body class="preload-transitions colorscheme-auto"
+        onload=""
+  >
+    
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Jack Baker
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/">
+              How to move your data science solution into a hands off state?
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2021-04-17T15:36:34&#43;01:00'>
+                April 17, 2021
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              3-minute read
+            </span>
+          </div>
+          <div class="authors">
+    <i class="fa fa-user" aria-hidden="true"></i>
+      <a href="/authors/jack-baker/">Jack Baker</a></div>
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <a href="/tags/data-science/">data science</a>
+      <span class="separator">•</span>
+    <a href="/tags/development/">development</a></div>
+
+        </div>
+      </header>
+
+      <div>
+        
+        <p>Once you&rsquo;ve developed a data science solution it&rsquo;s easy to tinker with it indefinitely: running it manually, making small changes to the output, iterating on the model. This is not ideal - once you have a solution you&rsquo;re happy with ideally you should be able to leave it running with minimal input from you, unless something falls over. Whether you&rsquo;re handing over to a support team, or will be supporting the tool yourself, this post gives some tips when you&rsquo;re trying to move your solution into a hands-off state - or putting it into production.</p>
+<p>Firstly you want to be logging. Logging is where output from your code is printed to a file so you (or the support team) can refer to it later. To move your code into a hands-off state you want to have logs that save to a file, so you can inspect these later if something goes wrong with the tool. What should you be logging? Any obvious things that might go wrong with the tool, such as data validation input, or the tool not being able to connect to a web service, etc. should be flagged as a warning or error and logged. Another good rule of thumb is to flag any &lsquo;transaction&rsquo;. What I mean by this is things like reading files, connecting to a database or calling an API. These are all things that can fail and help serve as a rough guide for where your code failed and what likely went wrong. It&rsquo;s a good idea to have a summary at the end of a log indicating if the tool finished successfully, and if it failed, what went wrong. A log summary is really appreciated by support teams.</p>
+<p>Another useful tool is alerting. This is where your tool notifies you (or the support team) when something went wrong or failed. One of the most effective ways of doing this is to get your tool to message you on slack or MS teams when something&rsquo;s gone wrong. This is very easy to do using webhooks. You can also use email for this e.g. using AWS SNS. It&rsquo;s a good idea to notify you when something&rsquo;s gone wrong, as well as when the tool is started and finished; then absence of these alerts will also tell you something is wrong.</p>
+<p>Triage tables are invaluable, especially if you are handing over to a support team or someone is keeping an eye on the tool while you&rsquo;re away. Triage tables list the most common things that can go wrong with the tool, as well as the team that should be contacted to resolve this issue. For example if your tool relies on a data feed that&rsquo;s managed by another team; if this breaks you can request support to contact that team directly. That way the issue can be resolved without you acting as an intermediary which wastes time for everyone. The act of doing this also forces you to think carefully about your tool and what error handling should be in place, to make sure it&rsquo;s clear from the logs what went wrong.</p>
+<p>Finally, you have to make sure you have a business&rsquo;s best interests at heart. It&rsquo;s easy as a data scientist to make constant iterations to a model, or to agree to every request a customer asks for. But at the end of the day, your job is to provide as much value to a business as possible. You want a model to be effective, but you don&rsquo;t need it to be perfect, after a point you can probably provide more value working on a different solution. Likewise, it&rsquo;s imperative to listen to what the customer wants, but after a time of ensuring you have met customer requirements, you might be able to provide better value by building the customer a different tool.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2021
+         Jack Baker 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+    </section>
+  </footer>
+
+
+    </main>
+
+    
+      
+      <script src="/js/coder.min.235666b114443867d43eeb5799d51f6252965e5163f338285e113fa381d3d27e.js" integrity="sha256-I1ZmsRREOGfUPutXmdUfYlKWXlFj8zgoXhE/o4HT0n4="></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
