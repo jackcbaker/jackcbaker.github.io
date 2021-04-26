@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="color-scheme" content="light dark">
+
+    
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; block-all-mixed-content; default-src 'self'; child-src 'self'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net/; form-action 'self'; frame-src 'self'; img-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/ https://cdn.jsdelivr.net/; script-src 'self' 'unsafe-inline' https://www.google-analytics.com; prefetch-src 'self';">
+    
+
+    <meta name="author" content="Jack Baker">
+    <meta name="description" content="Customers want results quickly. In this post I&#39;ll share some ways I use to try and develop solutions faster.">
+    <meta name="keywords" content="blog,data science">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Three ways to speed up developing your data science solutions"/>
+<meta name="twitter:description" content="Customers want results quickly. In this post I&#39;ll share some ways I use to try and develop solutions faster."/>
+
+    <meta property="og:title" content="Three ways to speed up developing your data science solutions" />
+<meta property="og:description" content="Customers want results quickly. In this post I&#39;ll share some ways I use to try and develop solutions faster." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://jackcbaker.github.io/posts/speed-up-data-science-development/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-04-26T21:00:00&#43;01:00" />
+<meta property="article:modified_time" content="2021-04-26T21:00:00&#43;01:00" />
+
+
+
+    <title>
+  Three ways to speed up developing your data science solutions · Jack Baker
+</title>
+
+    
+      <link rel="canonical" href="http://jackcbaker.github.io/posts/speed-up-data-science-development/">
+    
+
+    <link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.1.7" as="font" type="font/woff2" crossorigin>
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.eb7743f94930acfd17146aecc1f80e86fe35b3e451f2ec0c98485f9c4d962f34.css" integrity="sha256-63dD&#43;UkwrP0XFGrswfgOhv41s&#43;RR8uwMmEhfnE2WLzQ=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.dde8a61eb31a32353b4baf3d9113f03c4ea2a8ca9bb736f59ca2d2b2cb664f0b.css" integrity="sha256-3eimHrMaMjU7S689kRPwPE6iqMqbtzb1nKLSsstmTws=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+
+    <meta name="generator" content="Hugo 0.82.0" />
+  </head>
+
+  
+  
+    
+  
+  <body class="preload-transitions colorscheme-auto"
+        onload=""
+  >
+    
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Jack Baker
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://jackcbaker.github.io/posts/speed-up-data-science-development/">
+              Three ways to speed up developing your data science solutions
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2021-04-26T21:00:00&#43;01:00'>
+                April 26, 2021
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              3-minute read
+            </span>
+          </div>
+          <div class="authors">
+    <i class="fa fa-user" aria-hidden="true"></i>
+      <a href="/authors/jack-baker/">Jack Baker</a></div>
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <a href="/tags/data-science/">data science</a>
+      <span class="separator">•</span>
+    <a href="/tags/development/">development</a>
+      <span class="separator">•</span>
+    <a href="/tags/ai/">ai</a>
+      <span class="separator">•</span>
+    <a href="/tags/reusability/">reusability</a></div>
+
+        </div>
+      </header>
+
+      <div>
+        
+        <p>Your customers want results and quickly. This can be stressful as a data scientist: solutions are often experimental and results not guaranteed; you need time to think about the problem.</p>
+<p>In this post I&rsquo;ll share three ways I use to develop data science solutions faster.</p>
+<p>I find there are a few time sinks when developing data science solutions: going down a rabbit hole or dead end, productionising, checking your solution actually beats the current business process, and ensuring your code is free of bugs. How do I try to avoid these pitfalls?</p>
+<h2 id="1-start-as-simple-as-possible">
+  1. Start as simple as possible
+  <a class="heading-link" href="#1-start-as-simple-as-possible">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>When I start a new problem, I implement the simplest possible solution I can think of. Once this is developed and tested, I iteratively improve on it. What this gets you:</p>
+<ul>
+<li>A baseline you can compare all your models against. This helps stop you going down a rabbit hole: I talk about this more later.</li>
+<li>A quick, quality start &ndash; I regularly find a baseline beats a more complex model.</li>
+<li>A chance to develop the pipeline without worrying about intricate model headaches. I find this makes a solution easier to productionise.</li>
+</ul>
+<p>This also applies to iterations on your baseline. Break these down so they&rsquo;re as small as possible. If you follow the third point this becomes powerful.</p>
+<h2 id="2-modularise">
+  2. Modularise
+  <a class="heading-link" href="#2-modularise">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>Often a data science solution consists of lots of mini problems you need to solve. I recommend you break down your problem as much as possible into components. What this gets you:</p>
+<ul>
+<li>You can write each modular part as separate code modules. Set these to take relatively general input and output, and your code will be much easier to productionise: all you need to write are interfaces to your particular infrastructure (which is reusable code).</li>
+<li>Your code will be easier to test, which helps ensure it&rsquo;s bug free. For example using the technique I talk about <a href="https://jackcbaker.github.io/posts/check-data-science-pipeline-working/">in this post</a>.</li>
+<li>If you follow the first point, your code will be reusable for future solutions.</li>
+<li>Your baseline becomes even simpler :).</li>
+</ul>
+<p>For example, say you&rsquo;re developing a churn model, you might have: one or two modules handling data transformation, a module that handles the model build, one that handles serving predictions, and one that handles customer visualisations.</p>
+<h2 id="3-test-each-iteration-against-your-baseline-the-current-business-process-and-your-best-model-so-far">
+  3. Test each iteration against your baseline, the current business process and your best model so far
+  <a class="heading-link" href="#3-test-each-iteration-against-your-baseline-the-current-business-process-and-your-best-model-so-far">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>If you follow what I mentioned earlier and keep your model iterations small, this can really keep you on track:</p>
+<ul>
+<li>You catch rabbit holes early by seeing that an iteration made no improvement.</li>
+<li>You can hone in on which module needs most improvement.</li>
+<li>You can fail fast &ndash; if something isn&rsquo;t working, you&rsquo;ll know it quickly and can manage customer expectations.</li>
+<li>You have regular tangible results to share with customers.</li>
+</ul>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2021
+         Jack Baker 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+    </section>
+  </footer>
+
+
+    </main>
+
+    
+      
+      <script src="/js/coder.min.235666b114443867d43eeb5799d51f6252965e5163f338285e113fa381d3d27e.js" integrity="sha256-I1ZmsRREOGfUPutXmdUfYlKWXlFj8zgoXhE/o4HT0n4="></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
