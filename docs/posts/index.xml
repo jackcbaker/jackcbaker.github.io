@@ -19,15 +19,6 @@ I find there are a few time sinks when developing data science solutions: going 
     </item>
     
     <item>
-      <title>Speed up developing your data science solutions</title>
-      <link>http://jackcbaker.github.io/posts/check-data-science-pipeline-working/</link>
-      <pubDate>Sun, 25 Apr 2021 15:36:34 +0100</pubDate>
-      
-      <guid>http://jackcbaker.github.io/posts/check-data-science-pipeline-working/</guid>
-      <description>When I started in my first data science job, I thought making a data science tool reusable meant building one big data science tool that solves the original problem at hand and can be reapplied many times. While this is great when it&amp;rsquo;s possible, there&amp;rsquo;s many hurdles: business constraints might be different, the data sources might vary, or the objective might be different. These can often hamper the ability to make reusable tools.</description>
-    </item>
-    
-    <item>
       <title>How to move your data science solution into a hands off state</title>
       <link>http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/</link>
       <pubDate>Sat, 17 Apr 2021 15:36:34 +0100</pubDate>
