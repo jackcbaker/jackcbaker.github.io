@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>insights on Jack Baker</title>
+    <link>http://jackcbaker.github.io/tags/insights/</link>
+    <description>Recent content in insights on Jack Baker</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 04 May 2021 20:20:00 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/tags/insights/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A python equivalent for R markdown</title>
+      <link>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</link>
+      <pubDate>Tue, 04 May 2021 20:20:00 +0100</pubDate>
+      
+      <guid>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</guid>
+      <description>R markdown is a powerful tool for sharing insights with stakeholders. You can write snippets of R code that generate plots. This can then be compiled to a HTML or pdf file that you can share with non-technical stakeholders.
+This is not as straightforward in python. Yes, Jupyter notebooks are a great way of sharing analysis with other developers. But compiling to HTML/pdf, with code snippets removed, that looks nice enough for a non-technical stakeholder, I&amp;rsquo;ve found clunky using Jupyter notebooks.</description>
+    </item>
+    
+  </channel>
+</rss>

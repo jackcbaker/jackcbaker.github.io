@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="color-scheme" content="light dark">
+
+    
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; block-all-mixed-content; default-src 'self'; child-src 'self'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net/; form-action 'self'; frame-src 'self'; img-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/ https://cdn.jsdelivr.net/; script-src 'self' 'unsafe-inline' https://www.google-analytics.com; prefetch-src 'self';">
+    
+
+    <meta name="author" content="Jack Baker">
+    <meta name="description" content="R markdown is a powerful tool for sharing insights with stakeholders. In this post I talk about what I use when I need an equivalent solution in python.">
+    <meta name="keywords" content="blog,data science">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="A python equivalent for R markdown"/>
+<meta name="twitter:description" content="R markdown is a powerful tool for sharing insights with stakeholders. In this post I talk about what I use when I need an equivalent solution in python."/>
+
+    <meta property="og:title" content="A python equivalent for R markdown" />
+<meta property="og:description" content="R markdown is a powerful tool for sharing insights with stakeholders. In this post I talk about what I use when I need an equivalent solution in python." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-05-04T20:20:00&#43;01:00" />
+<meta property="article:modified_time" content="2021-05-04T20:20:00&#43;01:00" />
+
+
+
+    <title>
+  A python equivalent for R markdown · Jack Baker
+</title>
+
+    
+      <link rel="canonical" href="http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/">
+    
+
+    <link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.1.7" as="font" type="font/woff2" crossorigin>
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.eb7743f94930acfd17146aecc1f80e86fe35b3e451f2ec0c98485f9c4d962f34.css" integrity="sha256-63dD&#43;UkwrP0XFGrswfgOhv41s&#43;RR8uwMmEhfnE2WLzQ=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.dde8a61eb31a32353b4baf3d9113f03c4ea2a8ca9bb736f59ca2d2b2cb664f0b.css" integrity="sha256-3eimHrMaMjU7S689kRPwPE6iqMqbtzb1nKLSsstmTws=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+
+    <meta name="generator" content="Hugo 0.82.0" />
+  </head>
+
+  
+  
+    
+  
+  <body class="preload-transitions colorscheme-auto"
+        onload=""
+  >
+    
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Jack Baker
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/">
+              A python equivalent for R markdown
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2021-05-04T20:20:00&#43;01:00'>
+                May 4, 2021
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              3-minute read
+            </span>
+          </div>
+          <div class="authors">
+    <i class="fa fa-user" aria-hidden="true"></i>
+      <a href="/authors/jack-baker/">Jack Baker</a></div>
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <a href="/tags/data-science/">data science</a>
+      <span class="separator">•</span>
+    <a href="/tags/development/">development</a>
+      <span class="separator">•</span>
+    <a href="/tags/insights/">insights</a>
+      <span class="separator">•</span>
+    <a href="/tags/python/">python</a>
+      <span class="separator">•</span>
+    <a href="/tags/r/">R</a></div>
+
+        </div>
+      </header>
+
+      <div>
+        
+        <p><a href="https://rmarkdown.rstudio.com/">R markdown</a> is a powerful tool for sharing insights with stakeholders. You can write snippets of R code that generate plots. This can then be compiled to a HTML or pdf file that you can share with non-technical stakeholders.</p>
+<p>This is not as straightforward in python. Yes, Jupyter notebooks are a great way of sharing analysis with other developers. But compiling to HTML/pdf, with code snippets removed, that looks nice enough for a non-technical stakeholder, I&rsquo;ve found clunky using Jupyter notebooks. R markdown also has great tools to generate <a href="https://bookdown.org/yihui/rmarkdown-cookbook/kable.html">nice looking tables</a>, not just plots.</p>
+<p>I&rsquo;ve been working with a python heavy team though, so have been trying to figure out how to generate R markdown style documents. In this post I&rsquo;ll outline what I&rsquo;ve been using to generate HTML reports in python, that look nice enough to share with non-technical stakeholders. The process uses a few tools.</p>
+<h2 id="step-1-embedding-plots-in-html">
+  Step 1: Embedding Plots in HTML
+  <a class="heading-link" href="#step-1-embedding-plots-in-html">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>The first step is to embed plots into a static HTML that you can then share with others. A great tool for this is <a href="https://plotly.com/python/">plotly</a>. Plotly has a <a href="https://plotly.com/python-api-reference/generated/plotly.io.to_html.html"><code>to_html</code> function</a> (one of my amazing colleagues found this) which will write the plots as a HTML string, which you can then write to a file.</p>
+<p>Plotly graphs look the part, and they allow the user to hover over the points to see what the values are; I&rsquo;ve found this goes down well with customers.</p>
+<p>Sometimes users need plots they can copy-paste though. In this case I recommend using python&rsquo;s more standard plotting libraries, like <a href="https://seaborn.pydata.org/">seaborn</a> or <a href="https://matplotlib.org/">matplotlib</a>. To embed the image into HTML without needing to have a separate image file the HTML references is a bit more involved. But you can do it by encoding the image as base64 and writing directly to your HTML. Just follow the instructions in this <a href="https://stackoverflow.com/questions/48717794/matplotlib-embed-figures-in-auto-generated-html">stackoverflow post</a>.</p>
+<h2 id="step-2-setting-the-layout-of-the-html-document">
+  Step 2: Setting the Layout of the HTML Document
+  <a class="heading-link" href="#step-2-setting-the-layout-of-the-html-document">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>Great, now you can embed plots in HTML, and actually if you turn off the <code>full_html</code> option in plotly&rsquo;s <code>to_html</code> function, you can write as many plotly plots as you like to a html file by just appending the strings.</p>
+<p>But what about layout, commentary, and tables of data? This is where I use python&rsquo;s HTML templating libraries &ndash; which allow you to use python to generate static HTML files from templates. This technique is powerful, and used in python backend development libraries like <a href="https://flask.palletsprojects.com/en/1.1.x/">flask</a> and <a href="https://www.djangoproject.com/">django</a>. It&rsquo;s quick to learn, but does require some knowledge of HTML.</p>
+<p>I use the <a href="https://jinja.palletsprojects.com/en/2.11.x/">Jinja</a> library to generate my HTML reports (it&rsquo;s one of the most popular HTML templating libraries in python).</p>
+<h2 id="step-3-making-the-report-look-nice">
+  Step 3: Making the Report Look Nice
+  <a class="heading-link" href="#step-3-making-the-report-look-nice">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>For anyone that&rsquo;s worked with HTML before you&rsquo;ll know it takes a long time to make anything which looks presentable.</p>
+<p>I didn&rsquo;t want to spend much time on this because I wanted to generate the report as quick as possible. So I used the <a href="https://getbootstrap.com/">bootstrap</a> CSS library. This tool allows you to make your report look nice in a short amount of time (all I tend to do is wrap everything in a <code>&lt;div class=&quot;container&quot;&gt;</code> and maybe add some padding).</p>
+<p>Bootstrap is basically a set of prebuilt HTML classes you can use to format your HTML. For example to make an HTML table look nice in bootstrap it&rsquo;s as simple as <code>&lt;table class=&quot;table&quot;&gt;</code> (tables look quite ugly in standard HTML). You can add padding at the top of a title element by adding <code>&lt;h1 class=&quot;pt-1&quot;&gt;</code>.</p>
+<h2 id="thoughts">
+  Thoughts
+  <a class="heading-link" href="#thoughts">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>As you can see, this is a fiddlier process than with R markdown (if anyone has a better way, please get in touch!). But the tools are useful to learn, especially Jinja and bootstrap which are standard tools for web development. Once you&rsquo;ve learnt the libraries, and have some pre-made templates ready to go, the process gets quite quick.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+      </footer>
+    </article>
+
+    
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2021
+         Jack Baker 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+    </section>
+  </footer>
+
+
+    </main>
+
+    
+      
+      <script src="/js/coder.min.235666b114443867d43eeb5799d51f6252965e5163f338285e113fa381d3d27e.js" integrity="sha256-I1ZmsRREOGfUPutXmdUfYlKWXlFj8zgoXhE/o4HT0n4="></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
