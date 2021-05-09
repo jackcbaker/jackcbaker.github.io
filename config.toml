@@ -5,18 +5,22 @@ languageCode = "en"
 defaultContentLanguage = "en"
 publishDir = "docs"
 paginate = 20
-pygmentsStyle = "bw"
 pygmentsCodeFences = true
 pygmentsCodeFencesGuessSyntax = true
+pygmentsStyle = "monokai"
 enableEmoji = true
 # Enable Disqus comments
 # disqusShortname = "yourdiscussshortname"
+
+[markup.goldmark.renderer]
+unsafe= true
 
 [params]
 author = "Jack Baker"
 description = "Jack Baker's personal website"
 keywords = "blog,data science"
 info = "Data Scientist"
+math = true
 #avatarURL = "images/avatar.jpg"
 #gravatar = "john.doe@example.com"
 #footerContent = "Enter a text here."
