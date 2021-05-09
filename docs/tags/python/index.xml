@@ -6,7 +6,17 @@
     <description>Recent content in python on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 04 May 2021 20:20:00 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 08 May 2021 13:17:00 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Upweighting your recent observations in regression and classification</title>
+      <link>http://jackcbaker.github.io/posts/upweight-recent-observations-regression-classification/</link>
+      <pubDate>Sat, 08 May 2021 13:17:00 +0100</pubDate>
+      
+      <guid>http://jackcbaker.github.io/posts/upweight-recent-observations-regression-classification/</guid>
+      <description>COVID-19 has changed many established patterns. We&amp;rsquo;re all having to adjust to a new normal: how do we get our data science models to adjust as well?
+COVID aside, in any regression or classification problem where observations have a time element, old patterns can become stale. For this reason, I&amp;rsquo;m often asking myself &amp;ndash; how do I upweight my most recent observations? In this post I explain how to do this.</description>
+    </item>
+    
     <item>
       <title>A python equivalent for R markdown</title>
       <link>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</link>

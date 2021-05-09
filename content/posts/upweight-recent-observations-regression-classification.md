@@ -1,7 +1,7 @@
 +++ 
 draft = false
 date = 2021-05-08T13:17:00
-title = "Upweighting your most recent observations in regression and classification"
+title = "Upweighting your recent observations in regression and classification"
 description = "COVID-19 has changed many established patterns. We're all having to adjust to a new normal: how do we get our data science models to adjust as well? This post describes how to build regression and classification models that upweight more recent observations."
 slug = "upweight-recent-observations-regression-classification"
 authors = ["Jack Baker"]

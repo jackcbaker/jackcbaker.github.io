@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="color-scheme" content="light dark">
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; block-all-mixed-content; default-src 'self'; child-src 'self'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net/; form-action 'self'; frame-src 'self'; img-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/ https://cdn.jsdelivr.net/; script-src 'self' 'unsafe-inline' https://www.google-analytics.com; prefetch-src 'self';">
+    
+
+    <meta name="author" content="Jack Baker">
+    <meta name="description" content="COVID-19 has changed many established patterns. We&#39;re all having to adjust to a new normal: how do we get our data science models to adjust as well? This post describes how to build regression and classification models that upweight more recent observations.">
+    <meta name="keywords" content="blog,data science">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Upweighting your recent observations in regression and classification"/>
+<meta name="twitter:description" content="COVID-19 has changed many established patterns. We&#39;re all having to adjust to a new normal: how do we get our data science models to adjust as well? This post describes how to build regression and classification models that upweight more recent observations."/>
+
+    <meta property="og:title" content="Upweighting your recent observations in regression and classification" />
+<meta property="og:description" content="COVID-19 has changed many established patterns. We&#39;re all having to adjust to a new normal: how do we get our data science models to adjust as well? This post describes how to build regression and classification models that upweight more recent observations." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://jackcbaker.github.io/posts/upweight-recent-observations-regression-classification/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-05-08T13:17:00&#43;01:00" />
+<meta property="article:modified_time" content="2021-05-08T13:17:00&#43;01:00" />
+
+
+
+    <title>
+  Upweighting your recent observations in regression and classification · Jack Baker
+</title>
+
+    
+      <link rel="canonical" href="http://jackcbaker.github.io/posts/upweight-recent-observations-regression-classification/">
+    
+
+    <link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.1.7" as="font" type="font/woff2" crossorigin>
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.eb7743f94930acfd17146aecc1f80e86fe35b3e451f2ec0c98485f9c4d962f34.css" integrity="sha256-63dD&#43;UkwrP0XFGrswfgOhv41s&#43;RR8uwMmEhfnE2WLzQ=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.dde8a61eb31a32353b4baf3d9113f03c4ea2a8ca9bb736f59ca2d2b2cb664f0b.css" integrity="sha256-3eimHrMaMjU7S689kRPwPE6iqMqbtzb1nKLSsstmTws=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+
+    <meta name="generator" content="Hugo 0.82.0" />
+  </head>
+
+  
+  
+    
+  
+  <body class="preload-transitions colorscheme-auto"
+        onload=""
+  >
+    
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Jack Baker
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://jackcbaker.github.io/posts/upweight-recent-observations-regression-classification/">
+              Upweighting your recent observations in regression and classification
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2021-05-08T13:17:00&#43;01:00'>
+                May 8, 2021
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              5-minute read
+            </span>
+          </div>
+          <div class="authors">
+    <i class="fa fa-user" aria-hidden="true"></i>
+      <a href="/authors/jack-baker/">Jack Baker</a></div>
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <a href="/tags/data-science/">data science</a>
+      <span class="separator">•</span>
+    <a href="/tags/machine-learning/">machine learning</a>
+      <span class="separator">•</span>
+    <a href="/tags/python/">python</a>
+      <span class="separator">•</span>
+    <a href="/tags/r/">R</a></div>
+
+        </div>
+      </header>
+
+      <div>
+        
+        <p>COVID-19 has changed many established patterns. We&rsquo;re all having to adjust to a new normal: how do we get our data science models to adjust as well?</p>
+<p>COVID aside, in any regression or classification problem where observations have a time element, old patterns can become stale. For this reason, I&rsquo;m often asking myself &ndash; how do I upweight my most recent observations? In this post I explain how to do this.</p>
+<p>All the code in this tutorial is available as a <a href="https://github.com/jackcbaker/blog-notebooks/blob/main/regression-forgetting.ipynb">jupyter notebook</a> on my <a href="https://github.com/jackcbaker/">github</a>.</p>
+<h2 id="step-1-fetch-the-data">
+  Step 1: Fetch the data
+  <a class="heading-link" href="#step-1-fetch-the-data">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>For this post I&rsquo;ll be using data from the great <a href="https://coronavirus.data.gov.uk/">UK government COVID dashboard</a>. The data and plots from this website are readily available as part of the <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>.</p>
+<p>For this tutorial, we&rsquo;ll be using two measurements from the dashboard: <a href="https://coronavirus.data.gov.uk/details/cases">&lsquo;People tested positive&rsquo;</a> (I&rsquo;ll call this positive tests) and <a href="https://coronavirus.data.gov.uk/details/deaths">&lsquo;Deaths within 28 days of positive test&rsquo;</a> (I&rsquo;ll call this deaths).</p>
+<p>The plotted data as it appeared on the dashboard at the time of writing is below. We can see that for the recent data, positive tests seems to have a strong relationship with deaths; but that at the start of the pandemic - when less testing was being performed - the relationship does not look as strong.</p>
+
+<figure >
+    <style scoped>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    
+        <img src="/post_images/upweight-recent-observations/dashboard_snip.png" alt="Image of government dashboard of positive tests and deaths" class="center" />
+    
+    
+    <figcaption>
+        <p>
+        Government Dashboard of positive tests and deaths OGLv3.0.
+        <a href="https://coronavirus.data.gov.uk/"> 
+            Link to dashboard.
+        </a> 
+        </p> 
+    </figcaption>
+    
+</figure>
+
+<p>This suggests a pattern that has changed through time: this is something where we want to give more weight to new observations.</p>
+<p>To investigate this, let&rsquo;s first fetch both the datasets and combine them based on the date:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> pandas <span style="color:#f92672">as</span> pd
+<span style="color:#75715e"># We&#39;ll need this later...</span>
+<span style="color:#f92672">from</span> sklearn.linear_model <span style="color:#f92672">import</span> LinearRegression
+
+positive_tests <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#34;https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&amp;structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,</span><span style="color:#e6db74">%22d</span><span style="color:#e6db74">ate%22:</span><span style="color:#e6db74">%22d</span><span style="color:#e6db74">ate%22,%22newCasesBySpecimenDate%22:%22newCasesBySpecimenDate%22,</span><span style="color:#e6db74">%22c</span><span style="color:#e6db74">umCasesBySpecimenDate%22:</span><span style="color:#e6db74">%22c</span><span style="color:#e6db74">umCasesBySpecimenDate</span><span style="color:#e6db74">%22%</span><span style="color:#e6db74">7D&amp;format=csv&#34;</span>)
+num_deaths <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#34;https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&amp;structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,</span><span style="color:#e6db74">%22d</span><span style="color:#e6db74">ate%22:</span><span style="color:#e6db74">%22d</span><span style="color:#e6db74">ate%22,%22newDeaths28DaysByDeathDate%22:%22newDeaths28DaysByDeathDate%22,</span><span style="color:#e6db74">%22c</span><span style="color:#e6db74">umDeaths28DaysByDeathDate%22:</span><span style="color:#e6db74">%22c</span><span style="color:#e6db74">umDeaths28DaysByDeathDate</span><span style="color:#e6db74">%22%</span><span style="color:#e6db74">7D&amp;format=csv&#34;</span>)
+positive_tests[<span style="color:#e6db74">&#39;positive_tests&#39;</span>] <span style="color:#f92672">=</span> positive_tests[<span style="color:#e6db74">&#39;newCasesBySpecimenDate&#39;</span>]
+num_deaths[<span style="color:#e6db74">&#39;num_deaths&#39;</span>] <span style="color:#f92672">=</span> num_deaths[<span style="color:#e6db74">&#39;newDeaths28DaysByDeathDate&#39;</span>]
+covid_uk_df <span style="color:#f92672">=</span> num_deaths[[<span style="color:#e6db74">&#39;date&#39;</span>, <span style="color:#e6db74">&#39;num_deaths&#39;</span>]]<span style="color:#f92672">.</span>merge(positive_tests[[<span style="color:#e6db74">&#39;date&#39;</span>, <span style="color:#e6db74">&#39;positive_tests&#39;</span>]], on<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;date&#39;</span>)
+covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>] <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>to_datetime(covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>])
+<span style="color:#75715e"># Check there&#39;s not duplicates</span>
+<span style="color:#66d9ef">assert</span> len(set(covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>])) <span style="color:#f92672">==</span> len(covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>])
+covid_uk_df</code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+<pre><code>.dataframe tbody tr th {
+    vertical-align: top;
+}
+
+.dataframe thead th {
+    text-align: right;
+}
+</code></pre>
+<p></style></p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date</th>
+      <th>num_deaths</th>
+      <th>positive_tests</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2021-05-05</td>
+      <td>8</td>
+      <td>2229</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2021-05-04</td>
+      <td>9</td>
+      <td>2524</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2021-05-03</td>
+      <td>6</td>
+      <td>2145</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2021-05-02</td>
+      <td>9</td>
+      <td>1502</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2021-05-01</td>
+      <td>8</td>
+      <td>1388</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>425</th>
+      <td>2020-03-06</td>
+      <td>0</td>
+      <td>81</td>
+    </tr>
+    <tr>
+      <th>426</th>
+      <td>2020-03-05</td>
+      <td>3</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <th>427</th>
+      <td>2020-03-04</td>
+      <td>0</td>
+      <td>56</td>
+    </tr>
+    <tr>
+      <th>428</th>
+      <td>2020-03-03</td>
+      <td>2</td>
+      <td>56</td>
+    </tr>
+    <tr>
+      <th>429</th>
+      <td>2020-03-02</td>
+      <td>1</td>
+      <td>39</td>
+    </tr>
+  </tbody>
+</table>
+<p>430 rows × 3 columns</p>
+</div>
+<h2 id="step-2-adding-weights">
+  Step 2: Adding weights
+  <a class="heading-link" href="#step-2-adding-weights">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>Now we need to decide how to weight the observations. There are lots of options here, which is a bit confusing.</p>
+<p>I tend to use the same weights as used in <a href="https://otexts.com/fpp3/ses.html">exponential smoothing models</a>. Why? Exponential smoothing is a popular, simple forecasting method that has been around for over 60 years! It&rsquo;s tried and tested, and has not gone away.</p>
+<p>Let&rsquo;s set $T$ to be the time of the most recent observation, $t$ to be the time of the observation we&rsquo;re interested in, and $\gamma$ to be a hyperparameter we pick that&rsquo;s between 0 and 1. Then I set my weights $w$ to be</p>
+<p>\begin{equation}
+w = \gamma^{[T-t]}.
+\end{equation}</p>
+<p>What does this mean? Suppose we set $\gamma = 0.95$. Then if my observation is made at the most recent time point, its weight will be 1. If it&rsquo;s made at the second most recent time point, its weight will be 0.95. If it&rsquo;s made at the 10th most recent time point, its weight will be $\gamma^{10} = 0.95^{10} \approx 0.6$. Essentially our weight smoothly decreases to nothing as the observation gets older and older.</p>
+<p>An unfortunate side effect to this is we&rsquo;ve added a hyperparameter to tune. I often just quickly do this by eye looking at the data, but you can also tune this in the normal way using cross-validation or AIC/BIC. For this tutorial, I&rsquo;ll just set it to 0.9.</p>
+<p>Let&rsquo;s add weights to our data now:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Set hyperparam</span>
+gamma <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.9</span>
+most_recent_date <span style="color:#f92672">=</span> covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>]<span style="color:#f92672">.</span>max()
+days_before_recent_date <span style="color:#f92672">=</span> (most_recent_date <span style="color:#f92672">-</span> covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>])<span style="color:#f92672">.</span>dt<span style="color:#f92672">.</span>days
+covid_uk_df[<span style="color:#e6db74">&#39;weight&#39;</span>] <span style="color:#f92672">=</span> gamma <span style="color:#f92672">**</span> days_before_recent_date<span style="color:#f92672">.</span>values
+covid_uk_df
+</code></pre></div>
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date</th>
+      <th>num_deaths</th>
+      <th>positive_tests</th>
+      <th>weight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2021-05-05</td>
+      <td>8</td>
+      <td>2229</td>
+      <td>1.000000e+00</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2021-05-04</td>
+      <td>9</td>
+      <td>2524</td>
+      <td>9.000000e-01</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2021-05-03</td>
+      <td>6</td>
+      <td>2145</td>
+      <td>8.100000e-01</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2021-05-02</td>
+      <td>9</td>
+      <td>1502</td>
+      <td>7.290000e-01</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2021-05-01</td>
+      <td>8</td>
+      <td>1388</td>
+      <td>6.561000e-01</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>425</th>
+      <td>2020-03-06</td>
+      <td>0</td>
+      <td>81</td>
+      <td>3.573276e-20</td>
+    </tr>
+    <tr>
+      <th>426</th>
+      <td>2020-03-05</td>
+      <td>3</td>
+      <td>50</td>
+      <td>3.215948e-20</td>
+    </tr>
+    <tr>
+      <th>427</th>
+      <td>2020-03-04</td>
+      <td>0</td>
+      <td>56</td>
+      <td>2.894353e-20</td>
+    </tr>
+    <tr>
+      <th>428</th>
+      <td>2020-03-03</td>
+      <td>2</td>
+      <td>56</td>
+      <td>2.604918e-20</td>
+    </tr>
+    <tr>
+      <th>429</th>
+      <td>2020-03-02</td>
+      <td>1</td>
+      <td>39</td>
+      <td>2.344426e-20</td>
+    </tr>
+  </tbody>
+</table>
+<p>430 rows × 4 columns</p>
+</div>
+
+<h2 id="step-3-fit-your-model">
+  Step 3: Fit your model
+  <a class="heading-link" href="#step-3-fit-your-model">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>You might think that fitting our model will become a challenge now we&rsquo;ve added weights. It&rsquo;s actually dead easy.</p>
+<p>Most regression and classification algorithms allow you to provide a dataset weight: for tree based methods (sklearn random forest, xgboost, lightgbm), you just set the <code>sample_weight</code> in the <code>fit</code> function; for linear regression R&rsquo;s <code>lm</code> function has a <code>weights</code> argument, sklearn&rsquo;s <code>LinearRegression</code> has a <code>sample_weight</code> argument in the <code>fit</code> function.</p>
+<p>If your algorithm does not allow you to set a weight, you can borrow from the class imbalance techniques and <a href="https://machinelearningmastery.com/random-oversampling-and-undersampling-for-imbalanced-classification/">oversample/undersample</a> your observations based on your weights.</p>
+<p>Let&rsquo;s fit our model using sklearn&rsquo;s linear regression:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">weighted_model <span style="color:#f92672">=</span> LinearRegression()
+weighted_results <span style="color:#f92672">=</span> weighted_model<span style="color:#f92672">.</span>fit(
+    X<span style="color:#f92672">=</span>covid_uk_df[[<span style="color:#e6db74">&#39;positive_tests&#39;</span>]],
+    y<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;num_deaths&#39;</span>], 
+    sample_weight<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;weight&#39;</span>]
+)
+<span style="color:#75715e"># Return the R^2 score for our model</span>
+r2_weighted <span style="color:#f92672">=</span> weighted_results<span style="color:#f92672">.</span>score(
+    X<span style="color:#f92672">=</span>covid_uk_df[[<span style="color:#e6db74">&#39;positive_tests&#39;</span>]],
+    y<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;num_deaths&#39;</span>], 
+    sample_weight<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;weight&#39;</span>]
+)
+f<span style="color:#e6db74">&#34;R^2 score for the weighted model is {r2_weighted}&#34;</span>
+</code></pre></div><pre><code>'R^2 score for the weighted model is 0.5247115256308429'
+</code></pre>
+<p>Let&rsquo;s compare this to an unweighted model:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">unweighted_model <span style="color:#f92672">=</span> LinearRegression()
+unweighted_results <span style="color:#f92672">=</span> weighted_model<span style="color:#f92672">.</span>fit(
+    X<span style="color:#f92672">=</span>covid_uk_df[[<span style="color:#e6db74">&#39;positive_tests&#39;</span>]],
+    y<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;num_deaths&#39;</span>]
+)
+<span style="color:#75715e"># Return the R^2 score for our model</span>
+r2_unweighted <span style="color:#f92672">=</span> unweighted_results<span style="color:#f92672">.</span>score(
+    X<span style="color:#f92672">=</span>covid_uk_df[[<span style="color:#e6db74">&#39;positive_tests&#39;</span>]],
+    y<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;num_deaths&#39;</span>]
+)
+f<span style="color:#e6db74">&#34;R^2 score for the unweighted model is {r2_unweighted}&#34;</span>
+</code></pre></div><pre><code>'R^2 score for the unweighted model is 0.39299060569674615'
+</code></pre>
+<p>In this case we&rsquo;ve improved our in-sample fit significantly. Since regular testing is likely to continue in the UK, our weighted model should provide better out-of-sample predictions as well.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+      </footer>
+    </article>
+
+      <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [
+          ['$', '$'], ['\\(', '\\)']
+        ],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      }
+    };
+  </script>
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2021
+         Jack Baker 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+    </section>
+  </footer>
+
+
+    </main>
+
+    
+      
+      <script src="/js/coder.min.235666b114443867d43eeb5799d51f6252965e5163f338285e113fa381d3d27e.js" integrity="sha256-I1ZmsRREOGfUPutXmdUfYlKWXlFj8zgoXhE/o4HT0n4="></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>

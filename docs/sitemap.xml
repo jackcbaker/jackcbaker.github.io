@@ -2,37 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</loc>
-    <lastmod>2021-05-04T20:20:00+01:00</lastmod>
-  </url><url>
     <loc>http://jackcbaker.github.io/authors/</loc>
-    <lastmod>2021-05-04T20:20:00+01:00</lastmod>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
   </url><url>
     <loc>http://jackcbaker.github.io/tags/data-science/</loc>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
+  </url><url>
+    <loc>http://jackcbaker.github.io/authors/jack-baker/</loc>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
+  </url><url>
+    <loc>http://jackcbaker.github.io/</loc>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
+  </url><url>
+    <loc>http://jackcbaker.github.io/tags/machine-learning/</loc>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
+  </url><url>
+    <loc>http://jackcbaker.github.io/posts/</loc>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
+  </url><url>
+    <loc>http://jackcbaker.github.io/tags/python/</loc>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
+  </url><url>
+    <loc>http://jackcbaker.github.io/tags/r/</loc>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
+  </url><url>
+    <loc>http://jackcbaker.github.io/tags/</loc>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
+  </url><url>
+    <loc>http://jackcbaker.github.io/posts/upweight-recent-observations-regression-classification/</loc>
+    <lastmod>2021-05-08T13:17:00+01:00</lastmod>
+  </url><url>
+    <loc>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</loc>
     <lastmod>2021-05-04T20:20:00+01:00</lastmod>
   </url><url>
     <loc>http://jackcbaker.github.io/tags/development/</loc>
     <lastmod>2021-05-04T20:20:00+01:00</lastmod>
   </url><url>
     <loc>http://jackcbaker.github.io/tags/insights/</loc>
-    <lastmod>2021-05-04T20:20:00+01:00</lastmod>
-  </url><url>
-    <loc>http://jackcbaker.github.io/authors/jack-baker/</loc>
-    <lastmod>2021-05-04T20:20:00+01:00</lastmod>
-  </url><url>
-    <loc>http://jackcbaker.github.io/</loc>
-    <lastmod>2021-05-04T20:20:00+01:00</lastmod>
-  </url><url>
-    <loc>http://jackcbaker.github.io/posts/</loc>
-    <lastmod>2021-05-04T20:20:00+01:00</lastmod>
-  </url><url>
-    <loc>http://jackcbaker.github.io/tags/python/</loc>
-    <lastmod>2021-05-04T20:20:00+01:00</lastmod>
-  </url><url>
-    <loc>http://jackcbaker.github.io/tags/r/</loc>
-    <lastmod>2021-05-04T20:20:00+01:00</lastmod>
-  </url><url>
-    <loc>http://jackcbaker.github.io/tags/</loc>
     <lastmod>2021-05-04T20:20:00+01:00</lastmod>
   </url><url>
     <loc>http://jackcbaker.github.io/tags/ai/</loc>
