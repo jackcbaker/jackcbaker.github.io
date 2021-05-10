@@ -152,13 +152,13 @@ Now we need to decide how to weight the observations. There are lots of options 
 
 I tend to use the same weights as used in [exponential smoothing models](https://otexts.com/fpp3/ses.html). Why? Exponential smoothing is a popular, simple forecasting method that has been around for over 60 years! It's tried and tested, and has not gone away.
 
-Let's set $T$ to be the time of the most recent observation, $t$ to be the time of the observation we're interested in, and $\gamma$ to be a hyperparameter we pick that's between 0 and 1. Then I set my weights $w$ to be
+Let's set \\(T\\) to be the time of the most recent observation, \\(t\\) to be the time of the observation we're interested in, and \\(\gamma\\) to be a hyperparameter we pick that's between 0 and 1. Then I set my weights \\(w\\) to be
 
-\begin{equation}
+\\[
 w = \gamma^{[T-t]}.
-\end{equation}
+\\]
 
-What does this mean? Suppose we set $\gamma = 0.95$. Then if my observation is made at the most recent time point, its weight will be 1. If it's made at the second most recent time point, its weight will be 0.95. If it's made at the 10th most recent time point, its weight will be $\gamma^{10} = 0.95^{10} \approx 0.6$. Essentially our weight smoothly decreases to nothing as the observation gets older and older.
+What does this mean? Suppose we set \\(\gamma = 0.95\\). Then if my observation is made at the most recent time point, its weight will be 1. If it's made at the second most recent time point, its weight will be 0.95. If it's made at the 10th most recent time point, its weight will be \\(\gamma^{10} = 0.95^{10} \approx 0.6\\). Essentially our weight smoothly decreases to nothing as the observation gets older and older.
 
 An unfortunate side effect to this is we've added a hyperparameter to tune. I often just quickly do this by eye looking at the data, but you can also tune this in the normal way using cross-validation or AIC/BIC. For this tutorial, I'll just set it to 0.9.
 

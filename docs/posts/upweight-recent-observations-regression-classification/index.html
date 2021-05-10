@@ -7,6 +7,7 @@
     <meta http-equiv="Content-Language" content="en">
     <meta name="color-scheme" content="light dark">
 
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     
@@ -313,11 +314,11 @@ covid_uk_df</code></pre></div>
 </h2>
 <p>Now we need to decide how to weight the observations. There are lots of options here, which is a bit confusing.</p>
 <p>I tend to use the same weights as used in <a href="https://otexts.com/fpp3/ses.html">exponential smoothing models</a>. Why? Exponential smoothing is a popular, simple forecasting method that has been around for over 60 years! It&rsquo;s tried and tested, and has not gone away.</p>
-<p>Let&rsquo;s set $T$ to be the time of the most recent observation, $t$ to be the time of the observation we&rsquo;re interested in, and $\gamma$ to be a hyperparameter we pick that&rsquo;s between 0 and 1. Then I set my weights $w$ to be</p>
-<p>\begin{equation}
+<p>Let&rsquo;s set \(T\) to be the time of the most recent observation, \(t\) to be the time of the observation we&rsquo;re interested in, and \(\gamma\) to be a hyperparameter we pick that&rsquo;s between 0 and 1. Then I set my weights \(w\) to be</p>
+<p>\[
 w = \gamma^{[T-t]}.
-\end{equation}</p>
-<p>What does this mean? Suppose we set $\gamma = 0.95$. Then if my observation is made at the most recent time point, its weight will be 1. If it&rsquo;s made at the second most recent time point, its weight will be 0.95. If it&rsquo;s made at the 10th most recent time point, its weight will be $\gamma^{10} = 0.95^{10} \approx 0.6$. Essentially our weight smoothly decreases to nothing as the observation gets older and older.</p>
+\]</p>
+<p>What does this mean? Suppose we set \(\gamma = 0.95\). Then if my observation is made at the most recent time point, its weight will be 1. If it&rsquo;s made at the second most recent time point, its weight will be 0.95. If it&rsquo;s made at the 10th most recent time point, its weight will be \(\gamma^{10} = 0.95^{10} \approx 0.6\). Essentially our weight smoothly decreases to nothing as the observation gets older and older.</p>
 <p>An unfortunate side effect to this is we&rsquo;ve added a hyperparameter to tune. I often just quickly do this by eye looking at the data, but you can also tune this in the normal way using cross-validation or AIC/BIC. For this tutorial, I&rsquo;ll just set it to 0.9.</p>
 <p>Let&rsquo;s add weights to our data now:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Set hyperparam</span>
