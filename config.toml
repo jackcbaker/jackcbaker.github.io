@@ -11,6 +11,7 @@ pygmentsStyle = "monokai"
 enableEmoji = true
 # Enable Disqus comments
 # disqusShortname = "yourdiscussshortname"
+enableRobotsTXT = true
 
 [markup.goldmark.renderer]
 unsafe= true
