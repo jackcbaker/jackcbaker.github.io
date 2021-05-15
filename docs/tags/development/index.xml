@@ -2,58 +2,151 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>development on Jack Baker</title>
-    <link>http://jackcbaker.github.io/tags/development/</link>
+    <link>https://jackbakerds.com/tags/development/</link>
     <description>Recent content in development on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 04 May 2021 20:20:00 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/tags/development/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 04 May 2021 20:20:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/development/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>A python equivalent for R markdown</title>
-      <link>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</link>
+      <link>https://jackbakerds.com/posts/python-equivalent-rmarkdown/</link>
       <pubDate>Tue, 04 May 2021 20:20:00 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</guid>
-      <description>R markdown is a powerful tool for sharing insights with stakeholders. You can write snippets of R code that generate plots. This can then be compiled to a HTML or pdf file that you can share with non-technical stakeholders.
-This is not as straightforward in python. Yes, Jupyter notebooks are a great way of sharing analysis with other developers. But compiling to HTML/pdf, with code snippets removed, that looks nice enough for a non-technical stakeholder, I&amp;rsquo;ve found clunky using Jupyter notebooks.</description>
+      <guid>https://jackbakerds.com/posts/python-equivalent-rmarkdown/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://rmarkdown.rstudio.com/&#34;&gt;R markdown&lt;/a&gt; is a powerful tool for sharing insights with stakeholders. You can write snippets of R code that generate plots. This can then be compiled to a HTML or pdf file that you can share with non-technical stakeholders.&lt;/p&gt;
+&lt;p&gt;This is not as straightforward in python. Yes, Jupyter notebooks are a great way of sharing analysis with other developers. But compiling to HTML/pdf, with code snippets removed, that looks nice enough for a non-technical stakeholder, I&amp;rsquo;ve found clunky using Jupyter notebooks. R markdown also has great tools to generate &lt;a href=&#34;https://bookdown.org/yihui/rmarkdown-cookbook/kable.html&#34;&gt;nice looking tables&lt;/a&gt;, not just plots.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ve been working with a python heavy team though, so have been trying to figure out how to generate R markdown style documents. In this post I&amp;rsquo;ll outline what I&amp;rsquo;ve been using to generate HTML reports in python, that look nice enough to share with non-technical stakeholders. The process uses a few tools.&lt;/p&gt;
+&lt;h2 id=&#34;step-1-embedding-plots-in-html&#34;&gt;
+  Step 1: Embedding Plots in HTML
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-1-embedding-plots-in-html&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;The first step is to embed plots into a static HTML that you can then share with others. A great tool for this is &lt;a href=&#34;https://plotly.com/python/&#34;&gt;plotly&lt;/a&gt;. Plotly has a &lt;a href=&#34;https://plotly.com/python-api-reference/generated/plotly.io.to_html.html&#34;&gt;&lt;code&gt;to_html&lt;/code&gt; function&lt;/a&gt; (one of my amazing colleagues found this) which will write the plots as a HTML string, which you can then write to a file.&lt;/p&gt;
+&lt;p&gt;Plotly graphs look the part, and they allow the user to hover over the points to see what the values are; I&amp;rsquo;ve found this goes down well with customers.&lt;/p&gt;
+&lt;p&gt;Sometimes users need plots they can copy-paste though. In this case I recommend using python&amp;rsquo;s more standard plotting libraries, like &lt;a href=&#34;https://seaborn.pydata.org/&#34;&gt;seaborn&lt;/a&gt; or &lt;a href=&#34;https://matplotlib.org/&#34;&gt;matplotlib&lt;/a&gt;. To embed the image into HTML without needing to have a separate image file the HTML references is a bit more involved. But you can do it by encoding the image as base64 and writing directly to your HTML. Just follow the instructions in this &lt;a href=&#34;https://stackoverflow.com/questions/48717794/matplotlib-embed-figures-in-auto-generated-html&#34;&gt;stackoverflow post&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;step-2-setting-the-layout-of-the-html-document&#34;&gt;
+  Step 2: Setting the Layout of the HTML Document
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-2-setting-the-layout-of-the-html-document&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Great, now you can embed plots in HTML, and actually if you turn off the &lt;code&gt;full_html&lt;/code&gt; option in plotly&amp;rsquo;s &lt;code&gt;to_html&lt;/code&gt; function, you can write as many plotly plots as you like to a html file by just appending the strings.&lt;/p&gt;
+&lt;p&gt;But what about layout, commentary, and tables of data? This is where I use python&amp;rsquo;s HTML templating libraries &amp;ndash; which allow you to use python to generate static HTML files from templates. This technique is powerful, and used in python backend development libraries like &lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/&#34;&gt;flask&lt;/a&gt; and &lt;a href=&#34;https://www.djangoproject.com/&#34;&gt;django&lt;/a&gt;. It&amp;rsquo;s quick to learn, but does require some knowledge of HTML.&lt;/p&gt;
+&lt;p&gt;I use the &lt;a href=&#34;https://jinja.palletsprojects.com/en/2.11.x/&#34;&gt;Jinja&lt;/a&gt; library to generate my HTML reports (it&amp;rsquo;s one of the most popular HTML templating libraries in python).&lt;/p&gt;
+&lt;h2 id=&#34;step-3-making-the-report-look-nice&#34;&gt;
+  Step 3: Making the Report Look Nice
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-3-making-the-report-look-nice&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;For anyone that&amp;rsquo;s worked with HTML before you&amp;rsquo;ll know it takes a long time to make anything which looks presentable.&lt;/p&gt;
+&lt;p&gt;I didn&amp;rsquo;t want to spend much time on this because I wanted to generate the report as quick as possible. So I used the &lt;a href=&#34;https://getbootstrap.com/&#34;&gt;bootstrap&lt;/a&gt; CSS library. This tool allows you to make your report look nice in a short amount of time (all I tend to do is wrap everything in a &lt;code&gt;&amp;lt;div class=&amp;quot;container&amp;quot;&amp;gt;&lt;/code&gt; and maybe add some padding).&lt;/p&gt;
+&lt;p&gt;Bootstrap is basically a set of prebuilt HTML classes you can use to format your HTML. For example to make an HTML table look nice in bootstrap it&amp;rsquo;s as simple as &lt;code&gt;&amp;lt;table class=&amp;quot;table&amp;quot;&amp;gt;&lt;/code&gt; (tables look quite ugly in standard HTML). You can add padding at the top of a title element by adding &lt;code&gt;&amp;lt;h1 class=&amp;quot;pt-1&amp;quot;&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;thoughts&#34;&gt;
+  Thoughts
+  &lt;a class=&#34;heading-link&#34; href=&#34;#thoughts&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;As you can see, this is a fiddlier process than with R markdown (if anyone has a better way, please get in touch!). But the tools are useful to learn, especially Jinja and bootstrap which are standard tools for web development. Once you&amp;rsquo;ve learnt the libraries, and have some pre-made templates ready to go, the process gets quite quick.&lt;/p&gt;
+</description>
     </item>
     
     <item>
       <title>Three ways to speed up developing your data science solutions</title>
-      <link>http://jackcbaker.github.io/posts/speed-up-data-science-development/</link>
+      <link>https://jackbakerds.com/posts/speed-up-data-science-development/</link>
       <pubDate>Mon, 26 Apr 2021 21:00:00 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/speed-up-data-science-development/</guid>
-      <description>Your customers want results and quickly. This can be stressful as a data scientist: solutions are often experimental and results not guaranteed; you need time to think about the problem.
-In this post I&amp;rsquo;ll share three ways I use to develop data science solutions faster.
-I find there are a few time sinks when developing data science solutions: going down a rabbit hole or dead end, productionising, checking your solution actually beats the current business process, and ensuring your code is free of bugs.</description>
+      <guid>https://jackbakerds.com/posts/speed-up-data-science-development/</guid>
+      <description>&lt;p&gt;Your customers want results and quickly. This can be stressful as a data scientist: solutions are often experimental and results not guaranteed; you need time to think about the problem.&lt;/p&gt;
+&lt;p&gt;In this post I&amp;rsquo;ll share three ways I use to develop data science solutions faster.&lt;/p&gt;
+&lt;p&gt;I find there are a few time sinks when developing data science solutions: going down a rabbit hole or dead end, productionising, checking your solution actually beats the current business process, and ensuring your code is free of bugs. How do I try to avoid these pitfalls?&lt;/p&gt;
+&lt;h2 id=&#34;1-start-as-simple-as-possible&#34;&gt;
+  1. Start as simple as possible
+  &lt;a class=&#34;heading-link&#34; href=&#34;#1-start-as-simple-as-possible&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;When I start a new problem, I implement the simplest possible solution I can think of. Once this is developed and tested, I iteratively improve on it. What this gets you:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A baseline you can compare all your models against. This helps stop you going down a rabbit hole: I talk about this more later.&lt;/li&gt;
+&lt;li&gt;A quick, quality start &amp;ndash; I regularly find a baseline beats a more complex model.&lt;/li&gt;
+&lt;li&gt;A chance to develop the pipeline without worrying about intricate model headaches. I find this makes a solution easier to productionise.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This also applies to iterations on your baseline. Break these down so they&amp;rsquo;re as small as possible. If you follow the third point this becomes powerful.&lt;/p&gt;
+&lt;h2 id=&#34;2-modularise&#34;&gt;
+  2. Modularise
+  &lt;a class=&#34;heading-link&#34; href=&#34;#2-modularise&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Often a data science solution consists of lots of mini problems you need to solve. I recommend you break down your problem as much as possible into components. What this gets you:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You can write each modular part as separate code modules. Set these to take relatively general input and output, and your code will be much easier to productionise: all you need to write are interfaces to your particular infrastructure (which is reusable code).&lt;/li&gt;
+&lt;li&gt;Your code will be easier to test, which helps ensure it&amp;rsquo;s bug free. For example using the technique I talk about &lt;a href=&#34;https://jackcbaker.github.io/posts/check-data-science-pipeline-working/&#34;&gt;in this post&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;If you follow the first point, your code will be reusable for future solutions.&lt;/li&gt;
+&lt;li&gt;Your baseline becomes even simpler :).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For example, say you&amp;rsquo;re developing a churn model, you might have: one or two modules handling data transformation, a module that handles the model build, one that handles serving predictions, and one that handles customer visualisations.&lt;/p&gt;
+&lt;h2 id=&#34;3-test-each-iteration-against-your-baseline-the-current-business-process-and-your-best-model-so-far&#34;&gt;
+  3. Test each iteration against your baseline, the current business process and your best model so far
+  &lt;a class=&#34;heading-link&#34; href=&#34;#3-test-each-iteration-against-your-baseline-the-current-business-process-and-your-best-model-so-far&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;If you follow what I mentioned earlier and keep your model iterations small, this can really keep you on track:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You catch rabbit holes early by seeing that an iteration made no improvement.&lt;/li&gt;
+&lt;li&gt;You can hone in on which module needs most improvement.&lt;/li&gt;
+&lt;li&gt;You can fail fast &amp;ndash; if something isn&amp;rsquo;t working, you&amp;rsquo;ll know it quickly and can manage customer expectations.&lt;/li&gt;
+&lt;li&gt;You have regular tangible results to share with customers.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
     </item>
     
     <item>
       <title>How to move your data science solution into a hands off state</title>
-      <link>http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/</link>
+      <link>https://jackbakerds.com/posts/data-science-solution-to-hands-off-state/</link>
       <pubDate>Sat, 17 Apr 2021 15:36:34 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/</guid>
-      <description>Once you&amp;rsquo;ve developed a data science solution it&amp;rsquo;s easy to tinker with it indefinitely: running it manually, making small changes to the output, iterating on the model. This is not ideal - once you have a solution you&amp;rsquo;re happy with ideally you should be able to leave it running with minimal input from you, unless something falls over. Whether you&amp;rsquo;re handing over to a support team, or will be supporting the tool yourself, this post gives some tips when you&amp;rsquo;re trying to move your solution into a hands-off state - or putting it into production.</description>
+      <guid>https://jackbakerds.com/posts/data-science-solution-to-hands-off-state/</guid>
+      <description>&lt;p&gt;Once you&amp;rsquo;ve developed a data science solution it&amp;rsquo;s easy to tinker with it indefinitely: running it manually, making small changes to the output, iterating on the model. This is not ideal - once you have a solution you&amp;rsquo;re happy with ideally you should be able to leave it running with minimal input from you, unless something falls over. Whether you&amp;rsquo;re handing over to a support team, or will be supporting the tool yourself, this post gives some tips when you&amp;rsquo;re trying to move your solution into a hands-off state - or putting it into production.&lt;/p&gt;
+&lt;p&gt;Firstly you want to be logging. Logging is where output from your code is printed to a file so you (or the support team) can refer to it later. To move your code into a hands-off state you want to have logs that save to a file, so you can inspect these later if something goes wrong with the tool. What should you be logging? Any obvious things that might go wrong with the tool, such as data validation input, or the tool not being able to connect to a web service, etc. should be flagged as a warning or error and logged. Another good rule of thumb is to flag any &amp;lsquo;transaction&amp;rsquo;. What I mean by this is things like reading files, connecting to a database or calling an API. These are all things that can fail and help serve as a rough guide for where your code failed and what likely went wrong. It&amp;rsquo;s a good idea to have a summary at the end of a log indicating if the tool finished successfully, and if it failed, what went wrong. A log summary is really appreciated by support teams.&lt;/p&gt;
+&lt;p&gt;Another useful tool is alerting. This is where your tool notifies you (or the support team) when something went wrong or failed. One of the most effective ways of doing this is to get your tool to message you on slack or MS teams when something&amp;rsquo;s gone wrong. This is very easy to do using webhooks. You can also use email for this e.g. using AWS SNS. It&amp;rsquo;s a good idea to notify you when something&amp;rsquo;s gone wrong, as well as when the tool is started and finished; then absence of these alerts will also tell you something is wrong.&lt;/p&gt;
+&lt;p&gt;Triage tables are invaluable, especially if you are handing over to a support team or someone is keeping an eye on the tool while you&amp;rsquo;re away. Triage tables list the most common things that can go wrong with the tool, as well as the team that should be contacted to resolve this issue. For example if your tool relies on a data feed that&amp;rsquo;s managed by another team; if this breaks you can request support to contact that team directly. That way the issue can be resolved without you acting as an intermediary which wastes time for everyone. The act of doing this also forces you to think carefully about your tool and what error handling should be in place, to make sure it&amp;rsquo;s clear from the logs what went wrong.&lt;/p&gt;
+&lt;p&gt;Finally, you have to make sure you have a business&amp;rsquo;s best interests at heart. It&amp;rsquo;s easy as a data scientist to make constant iterations to a model, or to agree to every request a customer asks for. But at the end of the day, your job is to provide as much value to a business as possible. You want a model to be effective, but you don&amp;rsquo;t need it to be perfect, after a point you can probably provide more value working on a different solution. Likewise, it&amp;rsquo;s imperative to listen to what the customer wants, but after a time of ensuring you have met customer requirements, you might be able to provide better value by building the customer a different tool.&lt;/p&gt;
+</description>
     </item>
     
     <item>
       <title>How to tell your data science pipeline is actually working?</title>
-      <link>http://jackcbaker.github.io/posts/check-data-science-pipeline-working/</link>
+      <link>https://jackbakerds.com/posts/check-data-science-pipeline-working/</link>
       <pubDate>Sun, 11 Apr 2021 15:36:34 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/check-data-science-pipeline-working/</guid>
-      <description>I&amp;rsquo;ve been there - studying model output for hours to check a model is working. There&amp;rsquo;s some better ways than this. For example designing backtests to check a model does better than a baseline. The trouble with these methods is they don&amp;rsquo;t categorically show that a model doing exactly as it is designed to do; they&amp;rsquo;re also not automated, or (as with a backtest) are expensive to run; and sometimes they&amp;rsquo;re harder to design than the model itself!</description>
+      <guid>https://jackbakerds.com/posts/check-data-science-pipeline-working/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;ve been there - studying model output for hours to check a model is working. There&amp;rsquo;s some better ways than this. For example designing backtests to check a model does better than a baseline. The trouble with these methods is they don&amp;rsquo;t categorically show that a model doing exactly as it is designed to do; they&amp;rsquo;re also not automated, or (as with a backtest) are expensive to run; and sometimes they&amp;rsquo;re harder to design than the model itself! Tests that are not automated mean as soon as you make changes you need to do another lengthy check or risk the model being invalid. Other options are unit and integration tests, which are automated, but these don&amp;rsquo;t explicitly check the model is working correctly.&lt;/p&gt;
+&lt;p&gt;The way I solve this problem is test datasets. We often spend a lot of time as data scientists waiting for data to arrive. Why not create a test dataset during that time (it only takes about an hour for simple pipelines, which is a lot less than typical data lead time). This test dataset should: be modelled off the schema of your source data; have output that, once processed through your modelling pipeline, is known exactly. For example:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If you have a regression pipeline, you could generate random linearly related data and check held-out predictions match your actuals within a desired level of tolerance.&lt;/li&gt;
+&lt;li&gt;If you have a forecasting pipeline, you could check it can predict on timeseries data generated from an ARIMA process within a desired level of tolerance.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This does not replace the function of a backtest: it is not checking if the model actually works well on the problem at hand. But what it does is check that your modelling pipeline is doing exactly what it&amp;rsquo;s designed to do. This is especially important when you have quite a complex pipeline which is doing multiple data transformations before applying the model. It&amp;rsquo;s easy to make a mistake with these transformations and not notice. The test can also be automated, and is cheap to run (if you keep your test dataset small), so you get a free integration test on your full pipeline. That way if you make any changes you can just run the test again to check things are still working as expected. You can also add some tests in between different stages of the pipeline to get integration tests on different parts of the pipeline for free.&lt;/p&gt;
+</description>
     </item>
     
     <item>
       <title>How to include libraries in your project while also editing them</title>
-      <link>http://jackcbaker.github.io/posts/include-libraries-project-editing/</link>
+      <link>https://jackbakerds.com/posts/include-libraries-project-editing/</link>
       <pubDate>Tue, 06 Apr 2021 18:29:47 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/include-libraries-project-editing/</guid>
-      <description>I came across this issue the other day: I wanted to include a library in a project, but to make it work in my code I would have to edit it. I then needed to write those changes back to the original library, with minimal faff. This post explains the best way I found of doing this.
-An obvious solution is to include the whole codebase of the library into your project.</description>
+      <guid>https://jackbakerds.com/posts/include-libraries-project-editing/</guid>
+      <description>&lt;p&gt;I came across this issue the other day: I wanted to include a library in a project, but to make it work in my code I would have to edit it. I then needed to write those changes back to the original library, with minimal faff. This post explains the best way I found of doing this.&lt;/p&gt;
+&lt;p&gt;An obvious solution is to include the whole codebase of the library into your project. This will allow you to make the required changes. This can be quite messy though: your repo can become very large if you&amp;rsquo;re working with a big library, and it&amp;rsquo;s a pain to push your changes back to the original project.&lt;/p&gt;
+&lt;p&gt;I found a better way of doing this: &lt;a href=&#34;https://git-scm.com/book/en/v2/Git-Tools-Submodules&#34;&gt;&lt;code&gt;git submodule&lt;/code&gt;&lt;/a&gt;. &lt;code&gt;git submodule&lt;/code&gt; allows you to manage additional repos within your project. Using it, the submodule repo is contained in a directory in your own project. By going into the directory that contains that repo you can make changes to that module using the standard git workflow, and push them back to the original library.&lt;/p&gt;
+&lt;p&gt;When you push your own project repo, it will just contain a reference to the libraries repo location, and a commit-id. This keeps it small and concise. A great tutorial on how &lt;code&gt;git submodule&lt;/code&gt; works is &lt;a href=&#34;https://git-scm.com/book/en/v2/Git-Tools-Submodules&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;There&amp;rsquo;s a big push for reusability in code at the moment. This is a great way to keep your code as small reusable components rather than a big monolith.&lt;/p&gt;
+</description>
     </item>
     
   </channel>

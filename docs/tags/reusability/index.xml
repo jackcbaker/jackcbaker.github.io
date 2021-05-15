@@ -2,20 +2,61 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>reusability on Jack Baker</title>
-    <link>http://jackcbaker.github.io/tags/reusability/</link>
+    <link>https://jackbakerds.com/tags/reusability/</link>
     <description>Recent content in reusability on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 26 Apr 2021 21:00:00 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/tags/reusability/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 26 Apr 2021 21:00:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/reusability/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Three ways to speed up developing your data science solutions</title>
-      <link>http://jackcbaker.github.io/posts/speed-up-data-science-development/</link>
+      <link>https://jackbakerds.com/posts/speed-up-data-science-development/</link>
       <pubDate>Mon, 26 Apr 2021 21:00:00 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/speed-up-data-science-development/</guid>
-      <description>Your customers want results and quickly. This can be stressful as a data scientist: solutions are often experimental and results not guaranteed; you need time to think about the problem.
-In this post I&amp;rsquo;ll share three ways I use to develop data science solutions faster.
-I find there are a few time sinks when developing data science solutions: going down a rabbit hole or dead end, productionising, checking your solution actually beats the current business process, and ensuring your code is free of bugs.</description>
+      <guid>https://jackbakerds.com/posts/speed-up-data-science-development/</guid>
+      <description>&lt;p&gt;Your customers want results and quickly. This can be stressful as a data scientist: solutions are often experimental and results not guaranteed; you need time to think about the problem.&lt;/p&gt;
+&lt;p&gt;In this post I&amp;rsquo;ll share three ways I use to develop data science solutions faster.&lt;/p&gt;
+&lt;p&gt;I find there are a few time sinks when developing data science solutions: going down a rabbit hole or dead end, productionising, checking your solution actually beats the current business process, and ensuring your code is free of bugs. How do I try to avoid these pitfalls?&lt;/p&gt;
+&lt;h2 id=&#34;1-start-as-simple-as-possible&#34;&gt;
+  1. Start as simple as possible
+  &lt;a class=&#34;heading-link&#34; href=&#34;#1-start-as-simple-as-possible&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;When I start a new problem, I implement the simplest possible solution I can think of. Once this is developed and tested, I iteratively improve on it. What this gets you:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A baseline you can compare all your models against. This helps stop you going down a rabbit hole: I talk about this more later.&lt;/li&gt;
+&lt;li&gt;A quick, quality start &amp;ndash; I regularly find a baseline beats a more complex model.&lt;/li&gt;
+&lt;li&gt;A chance to develop the pipeline without worrying about intricate model headaches. I find this makes a solution easier to productionise.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This also applies to iterations on your baseline. Break these down so they&amp;rsquo;re as small as possible. If you follow the third point this becomes powerful.&lt;/p&gt;
+&lt;h2 id=&#34;2-modularise&#34;&gt;
+  2. Modularise
+  &lt;a class=&#34;heading-link&#34; href=&#34;#2-modularise&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Often a data science solution consists of lots of mini problems you need to solve. I recommend you break down your problem as much as possible into components. What this gets you:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You can write each modular part as separate code modules. Set these to take relatively general input and output, and your code will be much easier to productionise: all you need to write are interfaces to your particular infrastructure (which is reusable code).&lt;/li&gt;
+&lt;li&gt;Your code will be easier to test, which helps ensure it&amp;rsquo;s bug free. For example using the technique I talk about &lt;a href=&#34;https://jackcbaker.github.io/posts/check-data-science-pipeline-working/&#34;&gt;in this post&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;If you follow the first point, your code will be reusable for future solutions.&lt;/li&gt;
+&lt;li&gt;Your baseline becomes even simpler :).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For example, say you&amp;rsquo;re developing a churn model, you might have: one or two modules handling data transformation, a module that handles the model build, one that handles serving predictions, and one that handles customer visualisations.&lt;/p&gt;
+&lt;h2 id=&#34;3-test-each-iteration-against-your-baseline-the-current-business-process-and-your-best-model-so-far&#34;&gt;
+  3. Test each iteration against your baseline, the current business process and your best model so far
+  &lt;a class=&#34;heading-link&#34; href=&#34;#3-test-each-iteration-against-your-baseline-the-current-business-process-and-your-best-model-so-far&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;If you follow what I mentioned earlier and keep your model iterations small, this can really keep you on track:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You catch rabbit holes early by seeing that an iteration made no improvement.&lt;/li&gt;
+&lt;li&gt;You can hone in on which module needs most improvement.&lt;/li&gt;
+&lt;li&gt;You can fail fast &amp;ndash; if something isn&amp;rsquo;t working, you&amp;rsquo;ll know it quickly and can manage customer expectations.&lt;/li&gt;
+&lt;li&gt;You have regular tangible results to share with customers.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
     </item>
     
   </channel>

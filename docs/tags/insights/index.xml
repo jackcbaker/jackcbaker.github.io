@@ -2,19 +2,55 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>insights on Jack Baker</title>
-    <link>http://jackcbaker.github.io/tags/insights/</link>
+    <link>https://jackbakerds.com/tags/insights/</link>
     <description>Recent content in insights on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 04 May 2021 20:20:00 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/tags/insights/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 04 May 2021 20:20:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/insights/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>A python equivalent for R markdown</title>
-      <link>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</link>
+      <link>https://jackbakerds.com/posts/python-equivalent-rmarkdown/</link>
       <pubDate>Tue, 04 May 2021 20:20:00 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</guid>
-      <description>R markdown is a powerful tool for sharing insights with stakeholders. You can write snippets of R code that generate plots. This can then be compiled to a HTML or pdf file that you can share with non-technical stakeholders.
-This is not as straightforward in python. Yes, Jupyter notebooks are a great way of sharing analysis with other developers. But compiling to HTML/pdf, with code snippets removed, that looks nice enough for a non-technical stakeholder, I&amp;rsquo;ve found clunky using Jupyter notebooks.</description>
+      <guid>https://jackbakerds.com/posts/python-equivalent-rmarkdown/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://rmarkdown.rstudio.com/&#34;&gt;R markdown&lt;/a&gt; is a powerful tool for sharing insights with stakeholders. You can write snippets of R code that generate plots. This can then be compiled to a HTML or pdf file that you can share with non-technical stakeholders.&lt;/p&gt;
+&lt;p&gt;This is not as straightforward in python. Yes, Jupyter notebooks are a great way of sharing analysis with other developers. But compiling to HTML/pdf, with code snippets removed, that looks nice enough for a non-technical stakeholder, I&amp;rsquo;ve found clunky using Jupyter notebooks. R markdown also has great tools to generate &lt;a href=&#34;https://bookdown.org/yihui/rmarkdown-cookbook/kable.html&#34;&gt;nice looking tables&lt;/a&gt;, not just plots.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ve been working with a python heavy team though, so have been trying to figure out how to generate R markdown style documents. In this post I&amp;rsquo;ll outline what I&amp;rsquo;ve been using to generate HTML reports in python, that look nice enough to share with non-technical stakeholders. The process uses a few tools.&lt;/p&gt;
+&lt;h2 id=&#34;step-1-embedding-plots-in-html&#34;&gt;
+  Step 1: Embedding Plots in HTML
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-1-embedding-plots-in-html&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;The first step is to embed plots into a static HTML that you can then share with others. A great tool for this is &lt;a href=&#34;https://plotly.com/python/&#34;&gt;plotly&lt;/a&gt;. Plotly has a &lt;a href=&#34;https://plotly.com/python-api-reference/generated/plotly.io.to_html.html&#34;&gt;&lt;code&gt;to_html&lt;/code&gt; function&lt;/a&gt; (one of my amazing colleagues found this) which will write the plots as a HTML string, which you can then write to a file.&lt;/p&gt;
+&lt;p&gt;Plotly graphs look the part, and they allow the user to hover over the points to see what the values are; I&amp;rsquo;ve found this goes down well with customers.&lt;/p&gt;
+&lt;p&gt;Sometimes users need plots they can copy-paste though. In this case I recommend using python&amp;rsquo;s more standard plotting libraries, like &lt;a href=&#34;https://seaborn.pydata.org/&#34;&gt;seaborn&lt;/a&gt; or &lt;a href=&#34;https://matplotlib.org/&#34;&gt;matplotlib&lt;/a&gt;. To embed the image into HTML without needing to have a separate image file the HTML references is a bit more involved. But you can do it by encoding the image as base64 and writing directly to your HTML. Just follow the instructions in this &lt;a href=&#34;https://stackoverflow.com/questions/48717794/matplotlib-embed-figures-in-auto-generated-html&#34;&gt;stackoverflow post&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;step-2-setting-the-layout-of-the-html-document&#34;&gt;
+  Step 2: Setting the Layout of the HTML Document
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-2-setting-the-layout-of-the-html-document&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Great, now you can embed plots in HTML, and actually if you turn off the &lt;code&gt;full_html&lt;/code&gt; option in plotly&amp;rsquo;s &lt;code&gt;to_html&lt;/code&gt; function, you can write as many plotly plots as you like to a html file by just appending the strings.&lt;/p&gt;
+&lt;p&gt;But what about layout, commentary, and tables of data? This is where I use python&amp;rsquo;s HTML templating libraries &amp;ndash; which allow you to use python to generate static HTML files from templates. This technique is powerful, and used in python backend development libraries like &lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/&#34;&gt;flask&lt;/a&gt; and &lt;a href=&#34;https://www.djangoproject.com/&#34;&gt;django&lt;/a&gt;. It&amp;rsquo;s quick to learn, but does require some knowledge of HTML.&lt;/p&gt;
+&lt;p&gt;I use the &lt;a href=&#34;https://jinja.palletsprojects.com/en/2.11.x/&#34;&gt;Jinja&lt;/a&gt; library to generate my HTML reports (it&amp;rsquo;s one of the most popular HTML templating libraries in python).&lt;/p&gt;
+&lt;h2 id=&#34;step-3-making-the-report-look-nice&#34;&gt;
+  Step 3: Making the Report Look Nice
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-3-making-the-report-look-nice&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;For anyone that&amp;rsquo;s worked with HTML before you&amp;rsquo;ll know it takes a long time to make anything which looks presentable.&lt;/p&gt;
+&lt;p&gt;I didn&amp;rsquo;t want to spend much time on this because I wanted to generate the report as quick as possible. So I used the &lt;a href=&#34;https://getbootstrap.com/&#34;&gt;bootstrap&lt;/a&gt; CSS library. This tool allows you to make your report look nice in a short amount of time (all I tend to do is wrap everything in a &lt;code&gt;&amp;lt;div class=&amp;quot;container&amp;quot;&amp;gt;&lt;/code&gt; and maybe add some padding).&lt;/p&gt;
+&lt;p&gt;Bootstrap is basically a set of prebuilt HTML classes you can use to format your HTML. For example to make an HTML table look nice in bootstrap it&amp;rsquo;s as simple as &lt;code&gt;&amp;lt;table class=&amp;quot;table&amp;quot;&amp;gt;&lt;/code&gt; (tables look quite ugly in standard HTML). You can add padding at the top of a title element by adding &lt;code&gt;&amp;lt;h1 class=&amp;quot;pt-1&amp;quot;&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;thoughts&#34;&gt;
+  Thoughts
+  &lt;a class=&#34;heading-link&#34; href=&#34;#thoughts&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;As you can see, this is a fiddlier process than with R markdown (if anyone has a better way, please get in touch!). But the tools are useful to learn, especially Jinja and bootstrap which are standard tools for web development. Once you&amp;rsquo;ve learnt the libraries, and have some pre-made templates ready to go, the process gets quite quick.&lt;/p&gt;
+</description>
     </item>
     
   </channel>

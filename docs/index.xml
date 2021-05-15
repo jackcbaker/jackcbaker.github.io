@@ -2,78 +2,487 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Jack Baker</title>
-    <link>http://jackcbaker.github.io/</link>
+    <link>https://jackbakerds.com/</link>
     <description>Recent content on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 08 May 2021 13:17:00 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 08 May 2021 13:17:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Upweighting your recent observations in regression and classification</title>
-      <link>http://jackcbaker.github.io/posts/upweight-recent-observations-regression-classification/</link>
+      <link>https://jackbakerds.com/posts/upweight-recent-observations-regression-classification/</link>
       <pubDate>Sat, 08 May 2021 13:17:00 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/upweight-recent-observations-regression-classification/</guid>
-      <description>COVID-19 has changed many established patterns. We&amp;rsquo;re all having to adjust to a new normal: how do we get our data science models to adjust as well?
-COVID aside, in any regression or classification problem where observations have a time element, old patterns can become stale. For this reason, I&amp;rsquo;m often asking myself &amp;ndash; how do I upweight my most recent observations? In this post I explain how to do this.</description>
+      <guid>https://jackbakerds.com/posts/upweight-recent-observations-regression-classification/</guid>
+      <description>&lt;p&gt;COVID-19 has changed many established patterns. We&amp;rsquo;re all having to adjust to a new normal: how do we get our data science models to adjust as well?&lt;/p&gt;
+&lt;p&gt;COVID aside, in any regression or classification problem where observations have a time element, old patterns can become stale. For this reason, I&amp;rsquo;m often asking myself &amp;ndash; how do I upweight my most recent observations? In this post I explain how to do this.&lt;/p&gt;
+&lt;p&gt;All the code in this tutorial is available as a &lt;a href=&#34;https://github.com/jackcbaker/blog-notebooks/blob/main/regression-forgetting.ipynb&#34;&gt;jupyter notebook&lt;/a&gt; on my &lt;a href=&#34;https://github.com/jackcbaker/&#34;&gt;github&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;step-1-fetch-the-data&#34;&gt;
+  Step 1: Fetch the data
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-1-fetch-the-data&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;For this post I&amp;rsquo;ll be using data from the great &lt;a href=&#34;https://coronavirus.data.gov.uk/&#34;&gt;UK government COVID dashboard&lt;/a&gt;. The data and plots from this website are readily available as part of the &lt;a href=&#34;https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/&#34;&gt;Open Government Licence v3.0&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;For this tutorial, we&amp;rsquo;ll be using two measurements from the dashboard: &lt;a href=&#34;https://coronavirus.data.gov.uk/details/cases&#34;&gt;&amp;lsquo;People tested positive&amp;rsquo;&lt;/a&gt; (I&amp;rsquo;ll call this positive tests) and &lt;a href=&#34;https://coronavirus.data.gov.uk/details/deaths&#34;&gt;&amp;lsquo;Deaths within 28 days of positive test&amp;rsquo;&lt;/a&gt; (I&amp;rsquo;ll call this deaths).&lt;/p&gt;
+&lt;p&gt;The plotted data as it appeared on the dashboard at the time of writing is below. We can see that for the recent data, positive tests seems to have a strong relationship with deaths; but that at the start of the pandemic - when less testing was being performed - the relationship does not look as strong.&lt;/p&gt;
+
+&lt;figure &gt;
+    &lt;style scoped&gt;
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    &lt;/style&gt;
+    
+        &lt;img src=&#34;https://jackbakerds.com/post_images/upweight-recent-observations/dashboard_snip.png&#34; alt=&#34;Image of government dashboard of positive tests and deaths&#34; class=&#34;center&#34; /&gt;
+    
+    
+    &lt;figcaption&gt;
+        &lt;p&gt;
+        Government Dashboard of positive tests and deaths OGLv3.0.
+        &lt;a href=&#34;https://coronavirus.data.gov.uk/&#34;&gt; 
+            Link to dashboard.
+        &lt;/a&gt; 
+        &lt;/p&gt; 
+    &lt;/figcaption&gt;
+    
+&lt;/figure&gt;
+
+&lt;p&gt;This suggests a pattern that has changed through time: this is something where we want to give more weight to new observations.&lt;/p&gt;
+&lt;p&gt;To investigate this, let&amp;rsquo;s first fetch both the datasets and combine them based on the date:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; pandas &lt;span style=&#34;color:#f92672&#34;&gt;as&lt;/span&gt; pd
+&lt;span style=&#34;color:#75715e&#34;&gt;# We&amp;#39;ll need this later...&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; sklearn.linear_model &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; LinearRegression
+
+positive_tests &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pd&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;read_csv(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&amp;amp;structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22d&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;ate%22:&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22d&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;ate%22,%22newCasesBySpecimenDate%22:%22newCasesBySpecimenDate%22,&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22c&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;umCasesBySpecimenDate%22:&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22c&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;umCasesBySpecimenDate&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22%&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;7D&amp;amp;format=csv&amp;#34;&lt;/span&gt;)
+num_deaths &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pd&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;read_csv(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&amp;amp;structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22d&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;ate%22:&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22d&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;ate%22,%22newDeaths28DaysByDeathDate%22:%22newDeaths28DaysByDeathDate%22,&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22c&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;umDeaths28DaysByDeathDate%22:&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22c&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;umDeaths28DaysByDeathDate&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;%22%&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;7D&amp;amp;format=csv&amp;#34;&lt;/span&gt;)
+positive_tests[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;positive_tests&amp;#39;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; positive_tests[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;newCasesBySpecimenDate&amp;#39;&lt;/span&gt;]
+num_deaths[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;num_deaths&amp;#39;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; num_deaths[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;newDeaths28DaysByDeathDate&amp;#39;&lt;/span&gt;]
+covid_uk_df &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; num_deaths[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;num_deaths&amp;#39;&lt;/span&gt;]]&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;merge(positive_tests[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;positive_tests&amp;#39;&lt;/span&gt;]], on&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;)
+covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pd&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;to_datetime(covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#75715e&#34;&gt;# Check there&amp;#39;s not duplicates&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;assert&lt;/span&gt; len(set(covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;])) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; len(covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;])
+covid_uk_df&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div&gt;
+&lt;style scoped&gt;
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+&lt;pre&gt;&lt;code&gt;.dataframe tbody tr th {
+    vertical-align: top;
+}
+
+.dataframe thead th {
+    text-align: right;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;/style&gt;&lt;/p&gt;
+&lt;table border=&#34;1&#34; class=&#34;dataframe&#34;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&#34;text-align: right;&#34;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;date&lt;/th&gt;
+      &lt;th&gt;num_deaths&lt;/th&gt;
+      &lt;th&gt;positive_tests&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;2021-05-05&lt;/td&gt;
+      &lt;td&gt;8&lt;/td&gt;
+      &lt;td&gt;2229&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;2021-05-04&lt;/td&gt;
+      &lt;td&gt;9&lt;/td&gt;
+      &lt;td&gt;2524&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;2021-05-03&lt;/td&gt;
+      &lt;td&gt;6&lt;/td&gt;
+      &lt;td&gt;2145&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;2021-05-02&lt;/td&gt;
+      &lt;td&gt;9&lt;/td&gt;
+      &lt;td&gt;1502&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;2021-05-01&lt;/td&gt;
+      &lt;td&gt;8&lt;/td&gt;
+      &lt;td&gt;1388&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;...&lt;/th&gt;
+      &lt;td&gt;...&lt;/td&gt;
+      &lt;td&gt;...&lt;/td&gt;
+      &lt;td&gt;...&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;425&lt;/th&gt;
+      &lt;td&gt;2020-03-06&lt;/td&gt;
+      &lt;td&gt;0&lt;/td&gt;
+      &lt;td&gt;81&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;426&lt;/th&gt;
+      &lt;td&gt;2020-03-05&lt;/td&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt;50&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;427&lt;/th&gt;
+      &lt;td&gt;2020-03-04&lt;/td&gt;
+      &lt;td&gt;0&lt;/td&gt;
+      &lt;td&gt;56&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;428&lt;/th&gt;
+      &lt;td&gt;2020-03-03&lt;/td&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt;56&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;429&lt;/th&gt;
+      &lt;td&gt;2020-03-02&lt;/td&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;39&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;430 rows × 3 columns&lt;/p&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;step-2-adding-weights&#34;&gt;
+  Step 2: Adding weights
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-2-adding-weights&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Now we need to decide how to weight the observations. There are lots of options here, which is a bit confusing.&lt;/p&gt;
+&lt;p&gt;I tend to use the same weights as used in &lt;a href=&#34;https://otexts.com/fpp3/ses.html&#34;&gt;exponential smoothing models&lt;/a&gt;. Why? Exponential smoothing is a popular, simple forecasting method that has been around for over 60 years! It&amp;rsquo;s tried and tested, and has not gone away.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s set \(T\) to be the time of the most recent observation, \(t\) to be the time of the observation we&amp;rsquo;re interested in, and \(\gamma\) to be a hyperparameter we pick that&amp;rsquo;s between 0 and 1. Then I set my weights \(w\) to be&lt;/p&gt;
+&lt;p&gt;\[
+w = \gamma^{[T-t]}.
+\]&lt;/p&gt;
+&lt;p&gt;What does this mean? Suppose we set \(\gamma = 0.95\). Then if my observation is made at the most recent time point, its weight will be 1. If it&amp;rsquo;s made at the second most recent time point, its weight will be 0.95. If it&amp;rsquo;s made at the 10th most recent time point, its weight will be \(\gamma^{10} = 0.95^{10} \approx 0.6\). Essentially our weight smoothly decreases to nothing as the observation gets older and older.&lt;/p&gt;
+&lt;p&gt;An unfortunate side effect to this is we&amp;rsquo;ve added a hyperparameter to tune. I often just quickly do this by eye looking at the data, but you can also tune this in the normal way using cross-validation or AIC/BIC. For this tutorial, I&amp;rsquo;ll just set it to 0.9.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s add weights to our data now:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Set hyperparam&lt;/span&gt;
+gamma &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0.9&lt;/span&gt;
+most_recent_date &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;]&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;max()
+days_before_recent_date &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (most_recent_date &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;])&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;dt&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;days
+covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;weight&amp;#39;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; gamma &lt;span style=&#34;color:#f92672&#34;&gt;**&lt;/span&gt; days_before_recent_date&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;values
+covid_uk_df
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;div&gt;
+&lt;style scoped&gt;
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+&lt;/style&gt;
+&lt;table border=&#34;1&#34; class=&#34;dataframe&#34;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&#34;text-align: right;&#34;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;date&lt;/th&gt;
+      &lt;th&gt;num_deaths&lt;/th&gt;
+      &lt;th&gt;positive_tests&lt;/th&gt;
+      &lt;th&gt;weight&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;2021-05-05&lt;/td&gt;
+      &lt;td&gt;8&lt;/td&gt;
+      &lt;td&gt;2229&lt;/td&gt;
+      &lt;td&gt;1.000000e+00&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;2021-05-04&lt;/td&gt;
+      &lt;td&gt;9&lt;/td&gt;
+      &lt;td&gt;2524&lt;/td&gt;
+      &lt;td&gt;9.000000e-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;2021-05-03&lt;/td&gt;
+      &lt;td&gt;6&lt;/td&gt;
+      &lt;td&gt;2145&lt;/td&gt;
+      &lt;td&gt;8.100000e-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;2021-05-02&lt;/td&gt;
+      &lt;td&gt;9&lt;/td&gt;
+      &lt;td&gt;1502&lt;/td&gt;
+      &lt;td&gt;7.290000e-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;2021-05-01&lt;/td&gt;
+      &lt;td&gt;8&lt;/td&gt;
+      &lt;td&gt;1388&lt;/td&gt;
+      &lt;td&gt;6.561000e-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;...&lt;/th&gt;
+      &lt;td&gt;...&lt;/td&gt;
+      &lt;td&gt;...&lt;/td&gt;
+      &lt;td&gt;...&lt;/td&gt;
+      &lt;td&gt;...&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;425&lt;/th&gt;
+      &lt;td&gt;2020-03-06&lt;/td&gt;
+      &lt;td&gt;0&lt;/td&gt;
+      &lt;td&gt;81&lt;/td&gt;
+      &lt;td&gt;3.573276e-20&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;426&lt;/th&gt;
+      &lt;td&gt;2020-03-05&lt;/td&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt;50&lt;/td&gt;
+      &lt;td&gt;3.215948e-20&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;427&lt;/th&gt;
+      &lt;td&gt;2020-03-04&lt;/td&gt;
+      &lt;td&gt;0&lt;/td&gt;
+      &lt;td&gt;56&lt;/td&gt;
+      &lt;td&gt;2.894353e-20&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;428&lt;/th&gt;
+      &lt;td&gt;2020-03-03&lt;/td&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt;56&lt;/td&gt;
+      &lt;td&gt;2.604918e-20&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;429&lt;/th&gt;
+      &lt;td&gt;2020-03-02&lt;/td&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;39&lt;/td&gt;
+      &lt;td&gt;2.344426e-20&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;430 rows × 4 columns&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&#34;step-3-fit-your-model&#34;&gt;
+  Step 3: Fit your model
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-3-fit-your-model&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;You might think that fitting our model will become a challenge now we&amp;rsquo;ve added weights. It&amp;rsquo;s actually dead easy.&lt;/p&gt;
+&lt;p&gt;Most regression and classification algorithms allow you to provide a dataset weight: for tree based methods (sklearn random forest, xgboost, lightgbm), you just set the &lt;code&gt;sample_weight&lt;/code&gt; in the &lt;code&gt;fit&lt;/code&gt; function; for linear regression R&amp;rsquo;s &lt;code&gt;lm&lt;/code&gt; function has a &lt;code&gt;weights&lt;/code&gt; argument, sklearn&amp;rsquo;s &lt;code&gt;LinearRegression&lt;/code&gt; has a &lt;code&gt;sample_weight&lt;/code&gt; argument in the &lt;code&gt;fit&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;If your algorithm does not allow you to set a weight, you can borrow from the class imbalance techniques and &lt;a href=&#34;https://machinelearningmastery.com/random-oversampling-and-undersampling-for-imbalanced-classification/&#34;&gt;oversample/undersample&lt;/a&gt; your observations based on your weights.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s fit our model using sklearn&amp;rsquo;s linear regression:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;weighted_model &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; LinearRegression()
+weighted_results &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; weighted_model&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fit(
+    X&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;positive_tests&amp;#39;&lt;/span&gt;]],
+    y&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;num_deaths&amp;#39;&lt;/span&gt;], 
+    sample_weight&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;weight&amp;#39;&lt;/span&gt;]
+)
+&lt;span style=&#34;color:#75715e&#34;&gt;# Return the R^2 score for our model&lt;/span&gt;
+r2_weighted &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; weighted_results&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;score(
+    X&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;positive_tests&amp;#39;&lt;/span&gt;]],
+    y&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;num_deaths&amp;#39;&lt;/span&gt;], 
+    sample_weight&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;weight&amp;#39;&lt;/span&gt;]
+)
+f&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;R^2 score for the weighted model is {r2_weighted}&amp;#34;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;pre&gt;&lt;code&gt;&#39;R^2 score for the weighted model is 0.5247115256308429&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let&amp;rsquo;s compare this to an unweighted model:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;unweighted_model &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; LinearRegression()
+unweighted_results &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; weighted_model&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fit(
+    X&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;positive_tests&amp;#39;&lt;/span&gt;]],
+    y&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;num_deaths&amp;#39;&lt;/span&gt;]
+)
+&lt;span style=&#34;color:#75715e&#34;&gt;# Return the R^2 score for our model&lt;/span&gt;
+r2_unweighted &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; unweighted_results&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;score(
+    X&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;positive_tests&amp;#39;&lt;/span&gt;]],
+    y&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;covid_uk_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;num_deaths&amp;#39;&lt;/span&gt;]
+)
+f&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;R^2 score for the unweighted model is {r2_unweighted}&amp;#34;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;pre&gt;&lt;code&gt;&#39;R^2 score for the unweighted model is 0.39299060569674615&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this case we&amp;rsquo;ve improved our in-sample fit significantly. Since regular testing is likely to continue in the UK, our weighted model should provide better out-of-sample predictions as well.&lt;/p&gt;
+</description>
     </item>
     
     <item>
       <title>A python equivalent for R markdown</title>
-      <link>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</link>
+      <link>https://jackbakerds.com/posts/python-equivalent-rmarkdown/</link>
       <pubDate>Tue, 04 May 2021 20:20:00 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/python-equivalent-rmarkdown/</guid>
-      <description>R markdown is a powerful tool for sharing insights with stakeholders. You can write snippets of R code that generate plots. This can then be compiled to a HTML or pdf file that you can share with non-technical stakeholders.
-This is not as straightforward in python. Yes, Jupyter notebooks are a great way of sharing analysis with other developers. But compiling to HTML/pdf, with code snippets removed, that looks nice enough for a non-technical stakeholder, I&amp;rsquo;ve found clunky using Jupyter notebooks.</description>
+      <guid>https://jackbakerds.com/posts/python-equivalent-rmarkdown/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://rmarkdown.rstudio.com/&#34;&gt;R markdown&lt;/a&gt; is a powerful tool for sharing insights with stakeholders. You can write snippets of R code that generate plots. This can then be compiled to a HTML or pdf file that you can share with non-technical stakeholders.&lt;/p&gt;
+&lt;p&gt;This is not as straightforward in python. Yes, Jupyter notebooks are a great way of sharing analysis with other developers. But compiling to HTML/pdf, with code snippets removed, that looks nice enough for a non-technical stakeholder, I&amp;rsquo;ve found clunky using Jupyter notebooks. R markdown also has great tools to generate &lt;a href=&#34;https://bookdown.org/yihui/rmarkdown-cookbook/kable.html&#34;&gt;nice looking tables&lt;/a&gt;, not just plots.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ve been working with a python heavy team though, so have been trying to figure out how to generate R markdown style documents. In this post I&amp;rsquo;ll outline what I&amp;rsquo;ve been using to generate HTML reports in python, that look nice enough to share with non-technical stakeholders. The process uses a few tools.&lt;/p&gt;
+&lt;h2 id=&#34;step-1-embedding-plots-in-html&#34;&gt;
+  Step 1: Embedding Plots in HTML
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-1-embedding-plots-in-html&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;The first step is to embed plots into a static HTML that you can then share with others. A great tool for this is &lt;a href=&#34;https://plotly.com/python/&#34;&gt;plotly&lt;/a&gt;. Plotly has a &lt;a href=&#34;https://plotly.com/python-api-reference/generated/plotly.io.to_html.html&#34;&gt;&lt;code&gt;to_html&lt;/code&gt; function&lt;/a&gt; (one of my amazing colleagues found this) which will write the plots as a HTML string, which you can then write to a file.&lt;/p&gt;
+&lt;p&gt;Plotly graphs look the part, and they allow the user to hover over the points to see what the values are; I&amp;rsquo;ve found this goes down well with customers.&lt;/p&gt;
+&lt;p&gt;Sometimes users need plots they can copy-paste though. In this case I recommend using python&amp;rsquo;s more standard plotting libraries, like &lt;a href=&#34;https://seaborn.pydata.org/&#34;&gt;seaborn&lt;/a&gt; or &lt;a href=&#34;https://matplotlib.org/&#34;&gt;matplotlib&lt;/a&gt;. To embed the image into HTML without needing to have a separate image file the HTML references is a bit more involved. But you can do it by encoding the image as base64 and writing directly to your HTML. Just follow the instructions in this &lt;a href=&#34;https://stackoverflow.com/questions/48717794/matplotlib-embed-figures-in-auto-generated-html&#34;&gt;stackoverflow post&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;step-2-setting-the-layout-of-the-html-document&#34;&gt;
+  Step 2: Setting the Layout of the HTML Document
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-2-setting-the-layout-of-the-html-document&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Great, now you can embed plots in HTML, and actually if you turn off the &lt;code&gt;full_html&lt;/code&gt; option in plotly&amp;rsquo;s &lt;code&gt;to_html&lt;/code&gt; function, you can write as many plotly plots as you like to a html file by just appending the strings.&lt;/p&gt;
+&lt;p&gt;But what about layout, commentary, and tables of data? This is where I use python&amp;rsquo;s HTML templating libraries &amp;ndash; which allow you to use python to generate static HTML files from templates. This technique is powerful, and used in python backend development libraries like &lt;a href=&#34;https://flask.palletsprojects.com/en/1.1.x/&#34;&gt;flask&lt;/a&gt; and &lt;a href=&#34;https://www.djangoproject.com/&#34;&gt;django&lt;/a&gt;. It&amp;rsquo;s quick to learn, but does require some knowledge of HTML.&lt;/p&gt;
+&lt;p&gt;I use the &lt;a href=&#34;https://jinja.palletsprojects.com/en/2.11.x/&#34;&gt;Jinja&lt;/a&gt; library to generate my HTML reports (it&amp;rsquo;s one of the most popular HTML templating libraries in python).&lt;/p&gt;
+&lt;h2 id=&#34;step-3-making-the-report-look-nice&#34;&gt;
+  Step 3: Making the Report Look Nice
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-3-making-the-report-look-nice&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;For anyone that&amp;rsquo;s worked with HTML before you&amp;rsquo;ll know it takes a long time to make anything which looks presentable.&lt;/p&gt;
+&lt;p&gt;I didn&amp;rsquo;t want to spend much time on this because I wanted to generate the report as quick as possible. So I used the &lt;a href=&#34;https://getbootstrap.com/&#34;&gt;bootstrap&lt;/a&gt; CSS library. This tool allows you to make your report look nice in a short amount of time (all I tend to do is wrap everything in a &lt;code&gt;&amp;lt;div class=&amp;quot;container&amp;quot;&amp;gt;&lt;/code&gt; and maybe add some padding).&lt;/p&gt;
+&lt;p&gt;Bootstrap is basically a set of prebuilt HTML classes you can use to format your HTML. For example to make an HTML table look nice in bootstrap it&amp;rsquo;s as simple as &lt;code&gt;&amp;lt;table class=&amp;quot;table&amp;quot;&amp;gt;&lt;/code&gt; (tables look quite ugly in standard HTML). You can add padding at the top of a title element by adding &lt;code&gt;&amp;lt;h1 class=&amp;quot;pt-1&amp;quot;&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;thoughts&#34;&gt;
+  Thoughts
+  &lt;a class=&#34;heading-link&#34; href=&#34;#thoughts&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;As you can see, this is a fiddlier process than with R markdown (if anyone has a better way, please get in touch!). But the tools are useful to learn, especially Jinja and bootstrap which are standard tools for web development. Once you&amp;rsquo;ve learnt the libraries, and have some pre-made templates ready to go, the process gets quite quick.&lt;/p&gt;
+</description>
     </item>
     
     <item>
       <title>Three ways to speed up developing your data science solutions</title>
-      <link>http://jackcbaker.github.io/posts/speed-up-data-science-development/</link>
+      <link>https://jackbakerds.com/posts/speed-up-data-science-development/</link>
       <pubDate>Mon, 26 Apr 2021 21:00:00 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/speed-up-data-science-development/</guid>
-      <description>Your customers want results and quickly. This can be stressful as a data scientist: solutions are often experimental and results not guaranteed; you need time to think about the problem.
-In this post I&amp;rsquo;ll share three ways I use to develop data science solutions faster.
-I find there are a few time sinks when developing data science solutions: going down a rabbit hole or dead end, productionising, checking your solution actually beats the current business process, and ensuring your code is free of bugs.</description>
+      <guid>https://jackbakerds.com/posts/speed-up-data-science-development/</guid>
+      <description>&lt;p&gt;Your customers want results and quickly. This can be stressful as a data scientist: solutions are often experimental and results not guaranteed; you need time to think about the problem.&lt;/p&gt;
+&lt;p&gt;In this post I&amp;rsquo;ll share three ways I use to develop data science solutions faster.&lt;/p&gt;
+&lt;p&gt;I find there are a few time sinks when developing data science solutions: going down a rabbit hole or dead end, productionising, checking your solution actually beats the current business process, and ensuring your code is free of bugs. How do I try to avoid these pitfalls?&lt;/p&gt;
+&lt;h2 id=&#34;1-start-as-simple-as-possible&#34;&gt;
+  1. Start as simple as possible
+  &lt;a class=&#34;heading-link&#34; href=&#34;#1-start-as-simple-as-possible&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;When I start a new problem, I implement the simplest possible solution I can think of. Once this is developed and tested, I iteratively improve on it. What this gets you:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A baseline you can compare all your models against. This helps stop you going down a rabbit hole: I talk about this more later.&lt;/li&gt;
+&lt;li&gt;A quick, quality start &amp;ndash; I regularly find a baseline beats a more complex model.&lt;/li&gt;
+&lt;li&gt;A chance to develop the pipeline without worrying about intricate model headaches. I find this makes a solution easier to productionise.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This also applies to iterations on your baseline. Break these down so they&amp;rsquo;re as small as possible. If you follow the third point this becomes powerful.&lt;/p&gt;
+&lt;h2 id=&#34;2-modularise&#34;&gt;
+  2. Modularise
+  &lt;a class=&#34;heading-link&#34; href=&#34;#2-modularise&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Often a data science solution consists of lots of mini problems you need to solve. I recommend you break down your problem as much as possible into components. What this gets you:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You can write each modular part as separate code modules. Set these to take relatively general input and output, and your code will be much easier to productionise: all you need to write are interfaces to your particular infrastructure (which is reusable code).&lt;/li&gt;
+&lt;li&gt;Your code will be easier to test, which helps ensure it&amp;rsquo;s bug free. For example using the technique I talk about &lt;a href=&#34;https://jackcbaker.github.io/posts/check-data-science-pipeline-working/&#34;&gt;in this post&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;If you follow the first point, your code will be reusable for future solutions.&lt;/li&gt;
+&lt;li&gt;Your baseline becomes even simpler :).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For example, say you&amp;rsquo;re developing a churn model, you might have: one or two modules handling data transformation, a module that handles the model build, one that handles serving predictions, and one that handles customer visualisations.&lt;/p&gt;
+&lt;h2 id=&#34;3-test-each-iteration-against-your-baseline-the-current-business-process-and-your-best-model-so-far&#34;&gt;
+  3. Test each iteration against your baseline, the current business process and your best model so far
+  &lt;a class=&#34;heading-link&#34; href=&#34;#3-test-each-iteration-against-your-baseline-the-current-business-process-and-your-best-model-so-far&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;If you follow what I mentioned earlier and keep your model iterations small, this can really keep you on track:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You catch rabbit holes early by seeing that an iteration made no improvement.&lt;/li&gt;
+&lt;li&gt;You can hone in on which module needs most improvement.&lt;/li&gt;
+&lt;li&gt;You can fail fast &amp;ndash; if something isn&amp;rsquo;t working, you&amp;rsquo;ll know it quickly and can manage customer expectations.&lt;/li&gt;
+&lt;li&gt;You have regular tangible results to share with customers.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
     </item>
     
     <item>
       <title>How to move your data science solution into a hands off state</title>
-      <link>http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/</link>
+      <link>https://jackbakerds.com/posts/data-science-solution-to-hands-off-state/</link>
       <pubDate>Sat, 17 Apr 2021 15:36:34 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/data-science-solution-to-hands-off-state/</guid>
-      <description>Once you&amp;rsquo;ve developed a data science solution it&amp;rsquo;s easy to tinker with it indefinitely: running it manually, making small changes to the output, iterating on the model. This is not ideal - once you have a solution you&amp;rsquo;re happy with ideally you should be able to leave it running with minimal input from you, unless something falls over. Whether you&amp;rsquo;re handing over to a support team, or will be supporting the tool yourself, this post gives some tips when you&amp;rsquo;re trying to move your solution into a hands-off state - or putting it into production.</description>
+      <guid>https://jackbakerds.com/posts/data-science-solution-to-hands-off-state/</guid>
+      <description>&lt;p&gt;Once you&amp;rsquo;ve developed a data science solution it&amp;rsquo;s easy to tinker with it indefinitely: running it manually, making small changes to the output, iterating on the model. This is not ideal - once you have a solution you&amp;rsquo;re happy with ideally you should be able to leave it running with minimal input from you, unless something falls over. Whether you&amp;rsquo;re handing over to a support team, or will be supporting the tool yourself, this post gives some tips when you&amp;rsquo;re trying to move your solution into a hands-off state - or putting it into production.&lt;/p&gt;
+&lt;p&gt;Firstly you want to be logging. Logging is where output from your code is printed to a file so you (or the support team) can refer to it later. To move your code into a hands-off state you want to have logs that save to a file, so you can inspect these later if something goes wrong with the tool. What should you be logging? Any obvious things that might go wrong with the tool, such as data validation input, or the tool not being able to connect to a web service, etc. should be flagged as a warning or error and logged. Another good rule of thumb is to flag any &amp;lsquo;transaction&amp;rsquo;. What I mean by this is things like reading files, connecting to a database or calling an API. These are all things that can fail and help serve as a rough guide for where your code failed and what likely went wrong. It&amp;rsquo;s a good idea to have a summary at the end of a log indicating if the tool finished successfully, and if it failed, what went wrong. A log summary is really appreciated by support teams.&lt;/p&gt;
+&lt;p&gt;Another useful tool is alerting. This is where your tool notifies you (or the support team) when something went wrong or failed. One of the most effective ways of doing this is to get your tool to message you on slack or MS teams when something&amp;rsquo;s gone wrong. This is very easy to do using webhooks. You can also use email for this e.g. using AWS SNS. It&amp;rsquo;s a good idea to notify you when something&amp;rsquo;s gone wrong, as well as when the tool is started and finished; then absence of these alerts will also tell you something is wrong.&lt;/p&gt;
+&lt;p&gt;Triage tables are invaluable, especially if you are handing over to a support team or someone is keeping an eye on the tool while you&amp;rsquo;re away. Triage tables list the most common things that can go wrong with the tool, as well as the team that should be contacted to resolve this issue. For example if your tool relies on a data feed that&amp;rsquo;s managed by another team; if this breaks you can request support to contact that team directly. That way the issue can be resolved without you acting as an intermediary which wastes time for everyone. The act of doing this also forces you to think carefully about your tool and what error handling should be in place, to make sure it&amp;rsquo;s clear from the logs what went wrong.&lt;/p&gt;
+&lt;p&gt;Finally, you have to make sure you have a business&amp;rsquo;s best interests at heart. It&amp;rsquo;s easy as a data scientist to make constant iterations to a model, or to agree to every request a customer asks for. But at the end of the day, your job is to provide as much value to a business as possible. You want a model to be effective, but you don&amp;rsquo;t need it to be perfect, after a point you can probably provide more value working on a different solution. Likewise, it&amp;rsquo;s imperative to listen to what the customer wants, but after a time of ensuring you have met customer requirements, you might be able to provide better value by building the customer a different tool.&lt;/p&gt;
+</description>
     </item>
     
     <item>
       <title>How to tell your data science pipeline is actually working?</title>
-      <link>http://jackcbaker.github.io/posts/check-data-science-pipeline-working/</link>
+      <link>https://jackbakerds.com/posts/check-data-science-pipeline-working/</link>
       <pubDate>Sun, 11 Apr 2021 15:36:34 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/check-data-science-pipeline-working/</guid>
-      <description>I&amp;rsquo;ve been there - studying model output for hours to check a model is working. There&amp;rsquo;s some better ways than this. For example designing backtests to check a model does better than a baseline. The trouble with these methods is they don&amp;rsquo;t categorically show that a model doing exactly as it is designed to do; they&amp;rsquo;re also not automated, or (as with a backtest) are expensive to run; and sometimes they&amp;rsquo;re harder to design than the model itself!</description>
+      <guid>https://jackbakerds.com/posts/check-data-science-pipeline-working/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;ve been there - studying model output for hours to check a model is working. There&amp;rsquo;s some better ways than this. For example designing backtests to check a model does better than a baseline. The trouble with these methods is they don&amp;rsquo;t categorically show that a model doing exactly as it is designed to do; they&amp;rsquo;re also not automated, or (as with a backtest) are expensive to run; and sometimes they&amp;rsquo;re harder to design than the model itself! Tests that are not automated mean as soon as you make changes you need to do another lengthy check or risk the model being invalid. Other options are unit and integration tests, which are automated, but these don&amp;rsquo;t explicitly check the model is working correctly.&lt;/p&gt;
+&lt;p&gt;The way I solve this problem is test datasets. We often spend a lot of time as data scientists waiting for data to arrive. Why not create a test dataset during that time (it only takes about an hour for simple pipelines, which is a lot less than typical data lead time). This test dataset should: be modelled off the schema of your source data; have output that, once processed through your modelling pipeline, is known exactly. For example:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If you have a regression pipeline, you could generate random linearly related data and check held-out predictions match your actuals within a desired level of tolerance.&lt;/li&gt;
+&lt;li&gt;If you have a forecasting pipeline, you could check it can predict on timeseries data generated from an ARIMA process within a desired level of tolerance.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This does not replace the function of a backtest: it is not checking if the model actually works well on the problem at hand. But what it does is check that your modelling pipeline is doing exactly what it&amp;rsquo;s designed to do. This is especially important when you have quite a complex pipeline which is doing multiple data transformations before applying the model. It&amp;rsquo;s easy to make a mistake with these transformations and not notice. The test can also be automated, and is cheap to run (if you keep your test dataset small), so you get a free integration test on your full pipeline. That way if you make any changes you can just run the test again to check things are still working as expected. You can also add some tests in between different stages of the pipeline to get integration tests on different parts of the pipeline for free.&lt;/p&gt;
+</description>
     </item>
     
     <item>
       <title>How to include libraries in your project while also editing them</title>
-      <link>http://jackcbaker.github.io/posts/include-libraries-project-editing/</link>
+      <link>https://jackbakerds.com/posts/include-libraries-project-editing/</link>
       <pubDate>Tue, 06 Apr 2021 18:29:47 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/include-libraries-project-editing/</guid>
-      <description>I came across this issue the other day: I wanted to include a library in a project, but to make it work in my code I would have to edit it. I then needed to write those changes back to the original library, with minimal faff. This post explains the best way I found of doing this.
-An obvious solution is to include the whole codebase of the library into your project.</description>
+      <guid>https://jackbakerds.com/posts/include-libraries-project-editing/</guid>
+      <description>&lt;p&gt;I came across this issue the other day: I wanted to include a library in a project, but to make it work in my code I would have to edit it. I then needed to write those changes back to the original library, with minimal faff. This post explains the best way I found of doing this.&lt;/p&gt;
+&lt;p&gt;An obvious solution is to include the whole codebase of the library into your project. This will allow you to make the required changes. This can be quite messy though: your repo can become very large if you&amp;rsquo;re working with a big library, and it&amp;rsquo;s a pain to push your changes back to the original project.&lt;/p&gt;
+&lt;p&gt;I found a better way of doing this: &lt;a href=&#34;https://git-scm.com/book/en/v2/Git-Tools-Submodules&#34;&gt;&lt;code&gt;git submodule&lt;/code&gt;&lt;/a&gt;. &lt;code&gt;git submodule&lt;/code&gt; allows you to manage additional repos within your project. Using it, the submodule repo is contained in a directory in your own project. By going into the directory that contains that repo you can make changes to that module using the standard git workflow, and push them back to the original library.&lt;/p&gt;
+&lt;p&gt;When you push your own project repo, it will just contain a reference to the libraries repo location, and a commit-id. This keeps it small and concise. A great tutorial on how &lt;code&gt;git submodule&lt;/code&gt; works is &lt;a href=&#34;https://git-scm.com/book/en/v2/Git-Tools-Submodules&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;There&amp;rsquo;s a big push for reusability in code at the moment. This is a great way to keep your code as small reusable components rather than a big monolith.&lt;/p&gt;
+</description>
     </item>
     
     <item>
       <title>About</title>
-      <link>http://jackcbaker.github.io/about/</link>
+      <link>https://jackbakerds.com/about/</link>
       <pubDate>Sun, 28 Mar 2021 00:00:00 +0000</pubDate>
       
-      <guid>http://jackcbaker.github.io/about/</guid>
-      <description>I&amp;rsquo;m a data scientist based in Manchester. This site is a blog about data science and developing. The views expressed are my own.
-Before becoming a data scientist, I was a PhD student in statistical machine learning at STOR-i Centre for Doctoral Training at Lancaster University. I studied Markov Chain Monte Carlo (MCMC) approaches for large datasets. MCMC is the most popular approach for training Bayesian models, but it does not scale well to large datasets.</description>
+      <guid>https://jackbakerds.com/about/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;m a data scientist based in Manchester. This site is a blog about data science and developing. The views expressed are my own.&lt;/p&gt;
+&lt;p&gt;Before becoming a data scientist, I was a PhD student in statistical machine learning at &lt;a href=&#34;https://www.lancaster.ac.uk/stor-i/&#34;&gt;STOR-i&lt;/a&gt; Centre for Doctoral Training at Lancaster University. I studied Markov Chain Monte Carlo (MCMC) approaches for large datasets. MCMC is the most popular approach for training Bayesian models, but it does not scale well to large datasets.&lt;/p&gt;
+&lt;p&gt;Email: jackcbaker &amp;lt;at&amp;gt; yahoo &amp;lt;dot&amp;gt; com&lt;/p&gt;
+</description>
     </item>
     
   </channel>

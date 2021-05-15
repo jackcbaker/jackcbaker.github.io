@@ -2,19 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>coding on Jack Baker</title>
-    <link>http://jackcbaker.github.io/tags/coding/</link>
+    <link>https://jackbakerds.com/tags/coding/</link>
     <description>Recent content in coding on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 06 Apr 2021 18:29:47 +0100</lastBuildDate><atom:link href="http://jackcbaker.github.io/tags/coding/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 06 Apr 2021 18:29:47 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/coding/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>How to include libraries in your project while also editing them</title>
-      <link>http://jackcbaker.github.io/posts/include-libraries-project-editing/</link>
+      <link>https://jackbakerds.com/posts/include-libraries-project-editing/</link>
       <pubDate>Tue, 06 Apr 2021 18:29:47 +0100</pubDate>
       
-      <guid>http://jackcbaker.github.io/posts/include-libraries-project-editing/</guid>
-      <description>I came across this issue the other day: I wanted to include a library in a project, but to make it work in my code I would have to edit it. I then needed to write those changes back to the original library, with minimal faff. This post explains the best way I found of doing this.
-An obvious solution is to include the whole codebase of the library into your project.</description>
+      <guid>https://jackbakerds.com/posts/include-libraries-project-editing/</guid>
+      <description>&lt;p&gt;I came across this issue the other day: I wanted to include a library in a project, but to make it work in my code I would have to edit it. I then needed to write those changes back to the original library, with minimal faff. This post explains the best way I found of doing this.&lt;/p&gt;
+&lt;p&gt;An obvious solution is to include the whole codebase of the library into your project. This will allow you to make the required changes. This can be quite messy though: your repo can become very large if you&amp;rsquo;re working with a big library, and it&amp;rsquo;s a pain to push your changes back to the original project.&lt;/p&gt;
+&lt;p&gt;I found a better way of doing this: &lt;a href=&#34;https://git-scm.com/book/en/v2/Git-Tools-Submodules&#34;&gt;&lt;code&gt;git submodule&lt;/code&gt;&lt;/a&gt;. &lt;code&gt;git submodule&lt;/code&gt; allows you to manage additional repos within your project. Using it, the submodule repo is contained in a directory in your own project. By going into the directory that contains that repo you can make changes to that module using the standard git workflow, and push them back to the original library.&lt;/p&gt;
+&lt;p&gt;When you push your own project repo, it will just contain a reference to the libraries repo location, and a commit-id. This keeps it small and concise. A great tutorial on how &lt;code&gt;git submodule&lt;/code&gt; works is &lt;a href=&#34;https://git-scm.com/book/en/v2/Git-Tools-Submodules&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;There&amp;rsquo;s a big push for reusability in code at the moment. This is a great way to keep your code as small reusable components rather than a big monolith.&lt;/p&gt;
+</description>
     </item>
     
   </channel>
