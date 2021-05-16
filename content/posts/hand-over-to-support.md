@@ -8,9 +8,17 @@ authors = ["Jack Baker"]
 tags = ["data science", "development"]
 +++
 
-Once you've developed a data science solution it's easy to tinker with it indefinitely: running it manually, making small changes to the output, iterating on the model. This is not ideal - once you have a solution you're happy with ideally you should be able to leave it running with minimal input from you, unless something falls over. Whether you're handing over to a support team, or will be supporting the tool yourself, this post gives some tips when you're trying to move your solution into a hands-off state - or putting it into production.
 
-Firstly you want to be logging. Logging is where output from your code is printed to a file so you (or the support team) can refer to it later. To move your code into a hands-off state you want to have logs that save to a file, so you can inspect these later if something goes wrong with the tool. What should you be logging? Any obvious things that might go wrong with the tool, such as data validation input, or the tool not being able to connect to a web service, etc. should be flagged as a warning or error and logged. Another good rule of thumb is to flag any 'transaction'. What I mean by this is things like reading files, connecting to a database or calling an API. These are all things that can fail and help serve as a rough guide for where your code failed and what likely went wrong. It's a good idea to have a summary at the end of a log indicating if the tool finished successfully, and if it failed, what went wrong. A log summary is really appreciated by support teams.
+{{< image src="/post_images/hands-off/relaxed.jpg" alt="A person relaxing next to a lake" caption="Photo by " attrlink="https://unsplash.com/@simonmigaj?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText" attr="S Migaj on Unsplash.">}}
+
+
+Once you've developed a data science solution it's easy to tinker with it indefinitely: running it manually, making small changes to the output, iterating on the model. This is not ideal - once you have a solution you're happy with ideally you should be able to leave it running with minimal input from you, unless something falls over. 
+
+Whether you're handing over to a support team, or will be supporting the tool yourself, this post gives some tips when you're trying to move your solution into a hands-off state - or putting it into production.
+
+Firstly you want to be logging. Logging is where output from your code is printed to a file so you (or the support team) can refer to it later. To move your code into a hands-off state you want to have logs that save to a file, so you can inspect these later if something goes wrong with the tool. 
+
+What should you be logging? Any obvious things that might go wrong with the tool, such as data validation input, or the tool not being able to connect to a web service, etc. should be flagged as a warning or error and logged. Another good rule of thumb is to flag any 'transaction'. What I mean by this is things like reading files, connecting to a database or calling an API. These are all things that can fail and help serve as a rough guide for where your code failed and what likely went wrong. It's a good idea to have a summary at the end of a log indicating if the tool finished successfully, and if it failed, what went wrong. A log summary is really appreciated by support teams.
 
 Another useful tool is alerting. This is where your tool notifies you (or the support team) when something went wrong or failed. One of the most effective ways of doing this is to get your tool to message you on slack or MS teams when something's gone wrong. This is very easy to do using webhooks. You can also use email for this e.g. using AWS SNS. It's a good idea to notify you when something's gone wrong, as well as when the tool is started and finished; then absence of these alerts will also tell you something is wrong.
 
