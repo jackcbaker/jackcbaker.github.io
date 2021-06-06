@@ -6,7 +6,71 @@
     <description>Recent content in Posts on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 06 Jun 2021 15:59:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 06 Jun 2021 17:06:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MLOps tools for developing data pipelines</title>
+      <link>https://jackbakerds.com/posts/mlops-for-data-pipelines/</link>
+      <pubDate>Sun, 06 Jun 2021 17:06:00 +0100</pubDate>
+      
+      <guid>https://jackbakerds.com/posts/mlops-for-data-pipelines/</guid>
+      <description>&lt;p&gt;Designing robust data pipelines can be one of the slowest processes in data science development. It can also require maintenance of complex infrastructure. In this post we outline some useful MLOps tools that help with this process, and some good options for small teams.&lt;/p&gt;
+&lt;h2 id=&#34;orchestration&#34;&gt;
+  Orchestration
+  &lt;a class=&#34;heading-link&#34; href=&#34;#orchestration&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Orchestration is the bread and butter of designing data pipelines. Orchestration tools configure how your data pipelines will run in production:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;What will trigger a data pipeline to begin (scheduled or based off e.g. data arriving).&lt;/li&gt;
+&lt;li&gt;The order of your data pipeline and which processes trigger another.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Orchestration engines work using a DAG or directed acyclic graph. This means that each process will be a node in your graph, with arrows going from one node to another. The arrows determine which processes should follow another. This can be visualised graphically quite nicely, like in the picture below.&lt;/p&gt;
+
+&lt;figure &gt;
+    &lt;style scoped&gt;
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    &lt;/style&gt;
+    
+        &lt;img src=&#34;https://jackbakerds.com/post_images/mlops-data-pipeline/Data%20pipeline%20example.png&#34; alt=&#34;Example of a data pipeline DAG&#34; class=&#34;center&#34; /&gt;
+    
+    
+    &lt;figcaption&gt;
+        &lt;p&gt;
+        Example of a data pipeline DAG
+        
+            
+        
+        &lt;/p&gt; 
+    &lt;/figcaption&gt;
+    
+&lt;/figure&gt;
+
+&lt;p&gt;There are many open source orchestration tools. The classic tools are &lt;a href=&#34;https://github.com/apache/airflow&#34;&gt;airflow&lt;/a&gt; and &lt;a href=&#34;https://github.com/spotify/luigi&#34;&gt;luigi&lt;/a&gt;. Some newer orchestrators have been released since then, that can offer some slightly more modern features, though at the cost of a less developed community. These include: &lt;a href=&#34;https://github.com/argoproj/argo-workflows&#34;&gt;argo&lt;/a&gt; (has to be productionised on kubernetes) and &lt;a href=&#34;https://github.com/argoproj/argo-workflows&#34;&gt;dagster&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;One problem with open source orchestration tools, is they need to be productionised and maintained on particular infrastructure (e.g. in the case of argo, this would be a kubernetes cluster). This can be a significant overhead for small data teams.&lt;/p&gt;
+&lt;p&gt;For smaller data teams an alternative option is out-of-the-box solutions. One popular option for this is to use &lt;a href=&#34;https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&amp;amp;step-functions.sort-order=desc&#34;&gt;AWS Step functions&lt;/a&gt;, and &lt;a href=&#34;https://aws.amazon.com/batch/&#34;&gt;AWS batch&lt;/a&gt;; or similar services offered by other cloud providers. Because step functions are serverless, and AWS batch only boots up the EC2 when a job is running, these options can be cost effective. Alternatively, most out of the box, commercial data science platforms will have orchestrators built in.&lt;/p&gt;
+&lt;h2 id=&#34;ml-reproducibility-and-deployment&#34;&gt;
+  ML Reproducibility and Deployment
+  &lt;a class=&#34;heading-link&#34; href=&#34;#ml-reproducibility-and-deployment&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;The ML lifecycle is starting to become more defined, with experimentation performed on a local machine or cheap virtual machine in the cloud; the code is then refactored and deployed if the experimentation is successful.&lt;/p&gt;
+&lt;p&gt;The problem is that the refactoring and deployment step can take a long time if processes are not put in place.&lt;/p&gt;
+&lt;p&gt;This next set of tools I find particularly interesting. They aim to bridge the gap between experimentation and deployment and make it less painful. They do this by:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Implementing pipelining tools that make it easier to deploy code on orchestrators.&lt;/li&gt;
+&lt;li&gt;Model and data versioning and reproducibility to help keep track of experiments and easily deploy new models.&lt;/li&gt;
+&lt;li&gt;Having data access and credentials tools which make it easier to change where data is kept (for example if data is moved from local storage, to S3, to a database).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Tools for this include: &lt;a href=&#34;https://metaflow.org/&#34;&gt;metaflow&lt;/a&gt; built by the Netflix team and designed to work seamlessly with AWS; &lt;a href=&#34;https://mlflow.org/&#34;&gt;mlflow&lt;/a&gt; a popular tool for model management; &lt;a href=&#34;https://github.com/quantumblacklabs/kedro&#34;&gt;kedro&lt;/a&gt; a similar tool to metaflow but not as constrained to AWS infrastructure.&lt;/p&gt;
+</description>
+    </item>
+    
     <item>
       <title>Upweighting your recent observations in regression and classification</title>
       <link>https://jackbakerds.com/posts/upweight-recent-observations-regression-classification/</link>
