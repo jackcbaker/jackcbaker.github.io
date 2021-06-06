@@ -6,7 +6,248 @@
     <description>Recent content in python on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 04 May 2021 20:20:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 06 Jun 2021 15:59:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Upweighting your recent observations in regression and classification</title>
+      <link>https://jackbakerds.com/posts/upweight-recent-observations-regression-classification/</link>
+      <pubDate>Sun, 06 Jun 2021 15:59:00 +0100</pubDate>
+      
+      <guid>https://jackbakerds.com/posts/upweight-recent-observations-regression-classification/</guid>
+      <description>&lt;p&gt;In any regression or classification problem where observations have a time element, old patterns can become stale. For this reason, I&amp;rsquo;m often asking myself &amp;ndash; how do I upweight my most recent observations? In this post I explain how to do this.&lt;/p&gt;
+&lt;p&gt;All the code in this tutorial is available as a &lt;a href=&#34;https://github.com/jackcbaker/blog-notebooks/blob/main/regression-forgetting.ipynb&#34;&gt;jupyter notebook&lt;/a&gt; on my &lt;a href=&#34;https://github.com/jackcbaker/&#34;&gt;github&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;step-1-fetch-the-data&#34;&gt;
+  Step 1: Fetch the data
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-1-fetch-the-data&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;For this post I&amp;rsquo;ll be using price data from the &lt;a href=&#34;https://www.kaggle.com/camnugent/sandp500&#34;&gt;S&amp;amp;P500 available via Kaggle&amp;rsquo;s&lt;/a&gt; great dataset library. This dataset is released under the &lt;a href=&#34;https://creativecommons.org/publicdomain/zero/1.0/&#34;&gt;creative commons 0 license&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;A common problem in financial investments is to ensure you have a &lt;em&gt;balanced portfolio&lt;/em&gt;. If your portfolio is unbalanced it means that if one stock starts to perform poorly, all of them do. This means any portfolio risks can have a massive effect on value.&lt;/p&gt;
+&lt;p&gt;The ideal scenario is that if any stock started to decrease, this would be &lt;em&gt;balanced&lt;/em&gt; by an increase in another one: a balanced portfolio.&lt;/p&gt;
+&lt;p&gt;So we can just calculate the correlation coefficient between all the stocks in our portfolio and be done right? Not quite. These relationships tend to change through time, which is something we need to account for.&lt;/p&gt;
+&lt;p&gt;In this post we&amp;rsquo;ll use a regression model where recent observations are given more weight to model the relationship between two stocks. This ensures when deciding how balanced the stocks are we are taking into account that the relationship is likely to change over time.&lt;/p&gt;
+&lt;p&gt;The tutorial can be applied to any regression or classification problem where you suspect observations are likely to &amp;lsquo;get stale&amp;rsquo; or where relationships may change over time.&lt;/p&gt;
+&lt;p&gt;For this tutorial we&amp;rsquo;re going to compare the closing share price of American Express (AXP) to Apple&amp;rsquo;s (AAPL). First let&amp;rsquo;s load the dataset after downloading it from Kaggle&amp;hellip;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; pandas &lt;span style=&#34;color:#f92672&#34;&gt;as&lt;/span&gt; pd
+&lt;span style=&#34;color:#75715e&#34;&gt;# for plotting&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; seaborn &lt;span style=&#34;color:#f92672&#34;&gt;as&lt;/span&gt; sns
+&lt;span style=&#34;color:#75715e&#34;&gt;# We&amp;#39;ll need this later...&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; sklearn.linear_model &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; LinearRegression
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# Load in the full dataset rather than individual stocks&lt;/span&gt;
+snp_df &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pd&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;read_csv(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;data/all_stocks_5yr.csv&amp;#34;&lt;/span&gt;)
+&lt;span style=&#34;color:#75715e&#34;&gt;# Subset to just Nike and Apple stocks&lt;/span&gt;
+snp_df &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; snp_df&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;loc[snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Name&amp;#39;&lt;/span&gt;]&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;isin([&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AXP&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AAPL&amp;#39;&lt;/span&gt;])]
+&lt;span style=&#34;color:#75715e&#34;&gt;# Just take the columns we need&lt;/span&gt;
+snp_df &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; snp_df[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;close&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Name&amp;#39;&lt;/span&gt;]]
+&lt;span style=&#34;color:#75715e&#34;&gt;# Set dates to be datetime objects&lt;/span&gt;
+snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pd&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;to_datetime(snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;])
+&lt;span style=&#34;color:#75715e&#34;&gt;# Plot the data&lt;/span&gt;
+sns&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;lineplot(data&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df, x&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;, y&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;close&amp;#39;&lt;/span&gt;, hue&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Name&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#75715e&#34;&gt;# Reshape the data to wide format&lt;/span&gt;
+snp_df &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; snp_df&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;pivot(index&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;, columns&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;Name&amp;#39;&lt;/span&gt;, values&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;close&amp;#39;&lt;/span&gt;)&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;reset_index()
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;figure &gt;
+    &lt;style scoped&gt;
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    &lt;/style&gt;
+    
+        &lt;img src=&#34;https://jackbakerds.com/post_images/upweight-recent-observations/stock_plot.png&#34; alt=&#34;Plot of the closing prices of Apple stock vs. American Express&#34; class=&#34;center&#34; /&gt;
+    
+    
+    &lt;figcaption&gt;
+        &lt;p&gt;
+        Plot of the closing prices of Apple vs. American Express.
+        
+            
+        
+        &lt;/p&gt; 
+    &lt;/figcaption&gt;
+    
+&lt;/figure&gt;
+
+&lt;p&gt;We can see from the plot above that initially there is quite a strong relationship between Apple and American Express prices. This is weakened when the American Express price starts to fall. But after this the relationship appears to get stronger again. This suggests a model that accounts for the fact that relationships change through time might be better. It also suggests that most of the time these stocks are imbalanced: they tend to move together.&lt;/p&gt;
+&lt;h2 id=&#34;step-2-adding-weights&#34;&gt;
+  Step 2: Adding weights
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-2-adding-weights&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Now we need to decide how to weight the observations. There are lots of options here, which is a bit confusing.&lt;/p&gt;
+&lt;p&gt;I tend to use the same weights as used in &lt;a href=&#34;https://otexts.com/fpp3/ses.html&#34;&gt;exponential smoothing models&lt;/a&gt;. Why? Exponential smoothing is a popular, simple forecasting method that has been around for over 60 years! It&amp;rsquo;s tried and tested, and has not gone away.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s set \(T\) to be the time of the most recent observation, \(t\) to be the time of the observation we&amp;rsquo;re interested in, and \(\gamma\) to be a hyperparameter we pick that&amp;rsquo;s between 0 and 1. Then I set my weights \(w\) to be&lt;/p&gt;
+&lt;p&gt;\begin{equation}
+w = \gamma^{[T-t]}.
+\end{equation}&lt;/p&gt;
+&lt;p&gt;What does this mean? Suppose we set \(\gamma = 0.95\). Then if my observation is made at the most recent time point, its weight will be 1. If it&amp;rsquo;s made at the second most recent time point, its weight will be 0.95. If it&amp;rsquo;s made at the 10th most recent time point, its weight will be \(\gamma^{10} = 0.95^{10} \approx 0.6\). Essentially our weight smoothly decreases to nothing as the observation gets older and older.&lt;/p&gt;
+&lt;p&gt;An unfortunate side effect to this is we&amp;rsquo;ve added a hyperparameter to tune. I often just quickly do this by eye looking at the data, but you can also tune this in the normal way using cross-validation or AIC/BIC. For this tutorial, I&amp;rsquo;ll just set it to 0.8.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s add weights to our data now:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Set hyperparam&lt;/span&gt;
+gamma &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0.8&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;# Check both stocks go up to the same date&lt;/span&gt;
+most_recent_date &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;]&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;max()
+days_before_recent_date &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (most_recent_date &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;date&amp;#39;&lt;/span&gt;])&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;dt&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;days
+snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;weight&amp;#39;&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; gamma &lt;span style=&#34;color:#f92672&#34;&gt;**&lt;/span&gt; days_before_recent_date&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;values
+snp_df
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div&gt;
+&lt;style scoped&gt;
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+&lt;pre&gt;&lt;code&gt;.dataframe tbody tr th {
+    vertical-align: top;
+}
+
+.dataframe thead th {
+    text-align: right;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;/style&gt;&lt;/p&gt;
+&lt;table border=&#34;1&#34; class=&#34;dataframe&#34;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&#34;text-align: right;&#34;&gt;
+      &lt;th&gt;Name&lt;/th&gt;
+      &lt;th&gt;date&lt;/th&gt;
+      &lt;th&gt;AAPL&lt;/th&gt;
+      &lt;th&gt;AXP&lt;/th&gt;
+      &lt;th&gt;weight&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;2013-02-08&lt;/td&gt;
+      &lt;td&gt;67.8542&lt;/td&gt;
+      &lt;td&gt;61.80&lt;/td&gt;
+      &lt;td&gt;1.377927e-177&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;2013-02-11&lt;/td&gt;
+      &lt;td&gt;68.5614&lt;/td&gt;
+      &lt;td&gt;61.98&lt;/td&gt;
+      &lt;td&gt;2.691264e-177&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;2013-02-12&lt;/td&gt;
+      &lt;td&gt;66.8428&lt;/td&gt;
+      &lt;td&gt;62.20&lt;/td&gt;
+      &lt;td&gt;3.364080e-177&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;2013-02-13&lt;/td&gt;
+      &lt;td&gt;66.7156&lt;/td&gt;
+      &lt;td&gt;62.10&lt;/td&gt;
+      &lt;td&gt;4.205100e-177&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;2013-02-14&lt;/td&gt;
+      &lt;td&gt;66.6556&lt;/td&gt;
+      &lt;td&gt;62.34&lt;/td&gt;
+      &lt;td&gt;5.256375e-177&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;...&lt;/th&gt;
+      &lt;td&gt;...&lt;/td&gt;
+      &lt;td&gt;...&lt;/td&gt;
+      &lt;td&gt;...&lt;/td&gt;
+      &lt;td&gt;...&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1254&lt;/th&gt;
+      &lt;td&gt;2018-02-01&lt;/td&gt;
+      &lt;td&gt;167.7800&lt;/td&gt;
+      &lt;td&gt;100.00&lt;/td&gt;
+      &lt;td&gt;2.621440e-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1255&lt;/th&gt;
+      &lt;td&gt;2018-02-02&lt;/td&gt;
+      &lt;td&gt;160.5000&lt;/td&gt;
+      &lt;td&gt;96.68&lt;/td&gt;
+      &lt;td&gt;3.276800e-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1256&lt;/th&gt;
+      &lt;td&gt;2018-02-05&lt;/td&gt;
+      &lt;td&gt;156.4900&lt;/td&gt;
+      &lt;td&gt;92.01&lt;/td&gt;
+      &lt;td&gt;6.400000e-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1257&lt;/th&gt;
+      &lt;td&gt;2018-02-06&lt;/td&gt;
+      &lt;td&gt;163.0300&lt;/td&gt;
+      &lt;td&gt;94.18&lt;/td&gt;
+      &lt;td&gt;8.000000e-01&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1258&lt;/th&gt;
+      &lt;td&gt;2018-02-07&lt;/td&gt;
+      &lt;td&gt;159.5400&lt;/td&gt;
+      &lt;td&gt;93.61&lt;/td&gt;
+      &lt;td&gt;1.000000e+00&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;1259 rows × 4 columns&lt;/p&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;step-3-fit-your-model&#34;&gt;
+  Step 3: Fit your model
+  &lt;a class=&#34;heading-link&#34; href=&#34;#step-3-fit-your-model&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;You might think that fitting our model will become a challenge now we&amp;rsquo;ve added weights. It&amp;rsquo;s actually dead easy.&lt;/p&gt;
+&lt;p&gt;Most regression and classification algorithms allow you to provide a dataset weight: for tree based methods (sklearn random forest, xgboost, lightgbm), you just set the &lt;code&gt;sample_weight&lt;/code&gt; in the &lt;code&gt;fit&lt;/code&gt; function; for linear regression R&amp;rsquo;s &lt;code&gt;lm&lt;/code&gt; function has a &lt;code&gt;weights&lt;/code&gt; argument, sklearn&amp;rsquo;s &lt;code&gt;LinearRegression&lt;/code&gt; has a &lt;code&gt;sample_weight&lt;/code&gt; argument in the &lt;code&gt;fit&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;If your algorithm does not allow you to set a weight, you can borrow from the class imbalance techniques and &lt;a href=&#34;https://machinelearningmastery.com/random-oversampling-and-undersampling-for-imbalanced-classification/&#34;&gt;oversample/undersample&lt;/a&gt; your observations based on your weights.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s fit our model using sklearn&amp;rsquo;s linear regression:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;weighted_model &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; LinearRegression()
+weighted_results &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; weighted_model&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fit(
+    X&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AAPL&amp;#39;&lt;/span&gt;]],
+    y&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AXP&amp;#39;&lt;/span&gt;], 
+    sample_weight&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;weight&amp;#39;&lt;/span&gt;]
+)
+&lt;span style=&#34;color:#75715e&#34;&gt;# Return the R^2 score for our model&lt;/span&gt;
+r2_weighted &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; weighted_results&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;score(
+    X&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AAPL&amp;#39;&lt;/span&gt;]],
+    y&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AXP&amp;#39;&lt;/span&gt;], 
+    sample_weight&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;weight&amp;#39;&lt;/span&gt;]
+)
+&lt;span style=&#34;color:#66d9ef&#34;&gt;print&lt;/span&gt;(f&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;R^2 score for the weighted model is {r2_weighted}&amp;#34;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;print&lt;/span&gt;(f&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Linear coefficient of relationship of Apple to American Express is {weighted_model.coef_[0]}&amp;#34;&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;pre&gt;&lt;code&gt;R^2 score for the weighted model is 0.740848229773393
+Linear coefficient of relationship of Apple to American Express is 0.4810444526330664
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let&amp;rsquo;s compare this to an unweighted model:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;unweighted_model &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; LinearRegression()
+unweighted_results &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; unweighted_model&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fit(
+    X&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AAPL&amp;#39;&lt;/span&gt;]],
+    y&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AXP&amp;#39;&lt;/span&gt;]
+)
+&lt;span style=&#34;color:#75715e&#34;&gt;# Return the R^2 score for our model&lt;/span&gt;
+r2_unweighted &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; unweighted_results&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;score(
+    X&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AAPL&amp;#39;&lt;/span&gt;]],
+    y&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;snp_df[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;AXP&amp;#39;&lt;/span&gt;]
+)
+&lt;span style=&#34;color:#66d9ef&#34;&gt;print&lt;/span&gt;(f&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;R^2 score for the unweighted model is {r2_unweighted}&amp;#34;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;print&lt;/span&gt;(f&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Linear coefficient of relationship of Apple to American Express is {unweighted_model.coef_[0]}&amp;#34;&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;pre&gt;&lt;code&gt;R^2 score for the unweighted model is 0.1161401914047755
+Linear coefficient of relationship of Apple to American Express is 0.12149913600503894
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this case we&amp;rsquo;ve improved our in-sample fit significantly by using the weighted model. The coefficient is larger for the weighted model. This suggests that while previously, these stocks have not been that related, recently the stocks have become less balanced. This makes sense from what we saw when we plotted the two timeseries. This would be an increasing risk for our portfolio.&lt;/p&gt;
+</description>
+    </item>
+    
     <item>
       <title>A python equivalent for R markdown</title>
       <link>https://jackbakerds.com/posts/python-equivalent-rmarkdown/</link>

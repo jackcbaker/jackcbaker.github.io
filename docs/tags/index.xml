@@ -6,13 +6,49 @@
     <description>Recent content in Tags on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 04 May 2021 20:20:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 06 Jun 2021 15:59:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>data science</title>
       <link>https://jackbakerds.com/tags/data-science/</link>
-      <pubDate>Tue, 04 May 2021 20:20:00 +0100</pubDate>
+      <pubDate>Sun, 06 Jun 2021 15:59:00 +0100</pubDate>
       
       <guid>https://jackbakerds.com/tags/data-science/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>machine learning</title>
+      <link>https://jackbakerds.com/tags/machine-learning/</link>
+      <pubDate>Sun, 06 Jun 2021 15:59:00 +0100</pubDate>
+      
+      <guid>https://jackbakerds.com/tags/machine-learning/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>python</title>
+      <link>https://jackbakerds.com/tags/python/</link>
+      <pubDate>Sun, 06 Jun 2021 15:59:00 +0100</pubDate>
+      
+      <guid>https://jackbakerds.com/tags/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R</title>
+      <link>https://jackbakerds.com/tags/r/</link>
+      <pubDate>Sun, 06 Jun 2021 15:59:00 +0100</pubDate>
+      
+      <guid>https://jackbakerds.com/tags/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>timeseries</title>
+      <link>https://jackbakerds.com/tags/timeseries/</link>
+      <pubDate>Sun, 06 Jun 2021 15:59:00 +0100</pubDate>
+      
+      <guid>https://jackbakerds.com/tags/timeseries/</guid>
       <description></description>
     </item>
     
@@ -31,24 +67,6 @@
       <pubDate>Tue, 04 May 2021 20:20:00 +0100</pubDate>
       
       <guid>https://jackbakerds.com/tags/insights/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>python</title>
-      <link>https://jackbakerds.com/tags/python/</link>
-      <pubDate>Tue, 04 May 2021 20:20:00 +0100</pubDate>
-      
-      <guid>https://jackbakerds.com/tags/python/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>R</title>
-      <link>https://jackbakerds.com/tags/r/</link>
-      <pubDate>Tue, 04 May 2021 20:20:00 +0100</pubDate>
-      
-      <guid>https://jackbakerds.com/tags/r/</guid>
       <description></description>
     </item>
     

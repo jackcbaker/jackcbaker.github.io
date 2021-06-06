@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>machine learning on Jack Baker</title>
-    <link>https://jackbakerds.com/tags/machine-learning/</link>
-    <description>Recent content in machine learning on Jack Baker</description>
+    <title>timeseries on Jack Baker</title>
+    <link>https://jackbakerds.com/tags/timeseries/</link>
+    <description>Recent content in timeseries on Jack Baker</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 06 Jun 2021 15:59:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/machine-learning/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 06 Jun 2021 15:59:00 +0100</lastBuildDate><atom:link href="https://jackbakerds.com/tags/timeseries/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Upweighting your recent observations in regression and classification</title>
       <link>https://jackbakerds.com/posts/upweight-recent-observations-regression-classification/</link>

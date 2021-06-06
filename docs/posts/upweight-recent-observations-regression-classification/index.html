@@ -16,19 +16,19 @@
     
 
     <meta name="author" content="Jack Baker">
-    <meta name="description" content="COVID-19 has changed many established patterns. We&#39;re all having to adjust to a new normal: how do we get our data science models to adjust as well? This post describes how to build regression and classification models that upweight more recent observations.">
+    <meta name="description" content="In any data science problem where observations have a time element, old patterns can become stale. In this post we show how to upweight more recent observations to account for this.">
     <meta name="keywords" content="blog,data science">
 
     <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Upweighting your recent observations in regression and classification"/>
-<meta name="twitter:description" content="COVID-19 has changed many established patterns. We&#39;re all having to adjust to a new normal: how do we get our data science models to adjust as well? This post describes how to build regression and classification models that upweight more recent observations."/>
+<meta name="twitter:description" content="In any data science problem where observations have a time element, old patterns can become stale. In this post we show how to upweight more recent observations to account for this."/>
 
     <meta property="og:title" content="Upweighting your recent observations in regression and classification" />
-<meta property="og:description" content="COVID-19 has changed many established patterns. We&#39;re all having to adjust to a new normal: how do we get our data science models to adjust as well? This post describes how to build regression and classification models that upweight more recent observations." />
+<meta property="og:description" content="In any data science problem where observations have a time element, old patterns can become stale. In this post we show how to upweight more recent observations to account for this." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://jackbakerds.com/posts/upweight-recent-observations-regression-classification/" /><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2021-05-08T13:17:00&#43;01:00" />
-<meta property="article:modified_time" content="2021-05-08T13:17:00&#43;01:00" />
+<meta property="article:published_time" content="2021-06-06T15:59:00&#43;01:00" />
+<meta property="article:modified_time" content="2021-06-06T15:59:00&#43;01:00" />
 
 
 
@@ -134,18 +134,18 @@
           <div class="date">
             <span class="posted-on">
               <i class="fa fa-calendar" aria-hidden="true"></i>
-              <time datetime='2021-05-08T13:17:00&#43;01:00'>
-                May 8, 2021
+              <time datetime='2021-06-06T15:59:00&#43;01:00'>
+                June 6, 2021
               </time>
             </span>
             <span class="reading-time">
               <i class="fa fa-clock-o" aria-hidden="true"></i>
-              5-minute read
+              6-minute read
             </span>
           </div>
           <div class="authors">
     <i class="fa fa-user" aria-hidden="true"></i>
-      <a href="/authors/jack-baker/">Jack Baker</a></div> 
+      <a href="/authors/jack-baker/">jack baker</a></div> 
           
           <div class="tags">
   <i class="fa fa-tag" aria-hidden="true"></i>
@@ -155,7 +155,9 @@
       <span class="separator">•</span>
     <a href="/tags/python/">python</a>
       <span class="separator">•</span>
-    <a href="/tags/r/">R</a></div>
+    <a href="/tags/r/">r</a>
+      <span class="separator">•</span>
+    <a href="/tags/timeseries/">timeseries</a></div>
 
           <a href=https://twitter.com/jackbakerds target="_blank">
     <i class="bi bi-twitter"></i> Follow me on Twitter
@@ -165,8 +167,7 @@
 
       <div>
         
-        <p>COVID-19 has changed many established patterns. We&rsquo;re all having to adjust to a new normal: how do we get our data science models to adjust as well?</p>
-<p>COVID aside, in any regression or classification problem where observations have a time element, old patterns can become stale. For this reason, I&rsquo;m often asking myself &ndash; how do I upweight my most recent observations? In this post I explain how to do this.</p>
+        <p>In any regression or classification problem where observations have a time element, old patterns can become stale. For this reason, I&rsquo;m often asking myself &ndash; how do I upweight my most recent observations? In this post I explain how to do this.</p>
 <p>All the code in this tutorial is available as a <a href="https://github.com/jackcbaker/blog-notebooks/blob/main/regression-forgetting.ipynb">jupyter notebook</a> on my <a href="https://github.com/jackcbaker/">github</a>.</p>
 <h2 id="step-1-fetch-the-data">
   Step 1: Fetch the data
@@ -174,10 +175,32 @@
     <i class="fa fa-link" aria-hidden="true"></i>
   </a>
 </h2>
-<p>For this post I&rsquo;ll be using data from the great <a href="https://coronavirus.data.gov.uk/">UK government COVID dashboard</a>. The data and plots from this website are readily available as part of the <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>.</p>
-<p>For this tutorial, we&rsquo;ll be using two measurements from the dashboard: <a href="https://coronavirus.data.gov.uk/details/cases">&lsquo;People tested positive&rsquo;</a> (I&rsquo;ll call this positive tests) and <a href="https://coronavirus.data.gov.uk/details/deaths">&lsquo;Deaths within 28 days of positive test&rsquo;</a> (I&rsquo;ll call this deaths).</p>
-<p>The plotted data as it appeared on the dashboard at the time of writing is below. We can see that for the recent data, positive tests seems to have a strong relationship with deaths; but that at the start of the pandemic - when less testing was being performed - the relationship does not look as strong.</p>
+<p>For this post I&rsquo;ll be using price data from the <a href="https://www.kaggle.com/camnugent/sandp500">S&amp;P500 available via Kaggle&rsquo;s</a> great dataset library. This dataset is released under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">creative commons 0 license</a>.</p>
+<p>A common problem in financial investments is to ensure you have a <em>balanced portfolio</em>. If your portfolio is unbalanced it means that if one stock starts to perform poorly, all of them do. This means any portfolio risks can have a massive effect on value.</p>
+<p>The ideal scenario is that if any stock started to decrease, this would be <em>balanced</em> by an increase in another one: a balanced portfolio.</p>
+<p>So we can just calculate the correlation coefficient between all the stocks in our portfolio and be done right? Not quite. These relationships tend to change through time, which is something we need to account for.</p>
+<p>In this post we&rsquo;ll use a regression model where recent observations are given more weight to model the relationship between two stocks. This ensures when deciding how balanced the stocks are we are taking into account that the relationship is likely to change over time.</p>
+<p>The tutorial can be applied to any regression or classification problem where you suspect observations are likely to &lsquo;get stale&rsquo; or where relationships may change over time.</p>
+<p>For this tutorial we&rsquo;re going to compare the closing share price of American Express (AXP) to Apple&rsquo;s (AAPL). First let&rsquo;s load the dataset after downloading it from Kaggle&hellip;</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> pandas <span style="color:#f92672">as</span> pd
+<span style="color:#75715e"># for plotting</span>
+<span style="color:#f92672">import</span> seaborn <span style="color:#f92672">as</span> sns
+<span style="color:#75715e"># We&#39;ll need this later...</span>
+<span style="color:#f92672">from</span> sklearn.linear_model <span style="color:#f92672">import</span> LinearRegression
 
+<span style="color:#75715e"># Load in the full dataset rather than individual stocks</span>
+snp_df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#34;data/all_stocks_5yr.csv&#34;</span>)
+<span style="color:#75715e"># Subset to just Nike and Apple stocks</span>
+snp_df <span style="color:#f92672">=</span> snp_df<span style="color:#f92672">.</span>loc[snp_df[<span style="color:#e6db74">&#39;Name&#39;</span>]<span style="color:#f92672">.</span>isin([<span style="color:#e6db74">&#39;AXP&#39;</span>, <span style="color:#e6db74">&#39;AAPL&#39;</span>])]
+<span style="color:#75715e"># Just take the columns we need</span>
+snp_df <span style="color:#f92672">=</span> snp_df[[<span style="color:#e6db74">&#39;date&#39;</span>, <span style="color:#e6db74">&#39;close&#39;</span>, <span style="color:#e6db74">&#39;Name&#39;</span>]]
+<span style="color:#75715e"># Set dates to be datetime objects</span>
+snp_df[<span style="color:#e6db74">&#39;date&#39;</span>] <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>to_datetime(snp_df[<span style="color:#e6db74">&#39;date&#39;</span>])
+<span style="color:#75715e"># Plot the data</span>
+sns<span style="color:#f92672">.</span>lineplot(data<span style="color:#f92672">=</span>snp_df, x<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;date&#39;</span>, y<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;close&#39;</span>, hue<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;Name&#39;</span>)
+<span style="color:#75715e"># Reshape the data to wide format</span>
+snp_df <span style="color:#f92672">=</span> snp_df<span style="color:#f92672">.</span>pivot(index<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;date&#39;</span>, columns<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;Name&#39;</span>, values<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;close&#39;</span>)<span style="color:#f92672">.</span>reset_index()
+</code></pre></div>
 <figure >
     <style scoped>
         .center {
@@ -187,36 +210,44 @@
         }
     </style>
     
-        <img src="/post_images/upweight-recent-observations/dashboard_snip.png" alt="Image of government dashboard of positive tests and deaths" class="center" />
+        <img src="/post_images/upweight-recent-observations/stock_plot.png" alt="Plot of the closing prices of Apple stock vs. American Express" class="center" />
     
     
     <figcaption>
         <p>
-        Government Dashboard of positive tests and deaths OGLv3.0.
-        <a href="https://coronavirus.data.gov.uk/"> 
-            Link to dashboard.
-        </a> 
+        Plot of the closing prices of Apple vs. American Express.
+        
+            
+        
         </p> 
     </figcaption>
     
 </figure>
 
-<p>This suggests a pattern that has changed through time: this is something where we want to give more weight to new observations.</p>
-<p>To investigate this, let&rsquo;s first fetch both the datasets and combine them based on the date:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> pandas <span style="color:#f92672">as</span> pd
-<span style="color:#75715e"># We&#39;ll need this later...</span>
-<span style="color:#f92672">from</span> sklearn.linear_model <span style="color:#f92672">import</span> LinearRegression
-
-positive_tests <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#34;https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&amp;structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,</span><span style="color:#e6db74">%22d</span><span style="color:#e6db74">ate%22:</span><span style="color:#e6db74">%22d</span><span style="color:#e6db74">ate%22,%22newCasesBySpecimenDate%22:%22newCasesBySpecimenDate%22,</span><span style="color:#e6db74">%22c</span><span style="color:#e6db74">umCasesBySpecimenDate%22:</span><span style="color:#e6db74">%22c</span><span style="color:#e6db74">umCasesBySpecimenDate</span><span style="color:#e6db74">%22%</span><span style="color:#e6db74">7D&amp;format=csv&#34;</span>)
-num_deaths <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#34;https://coronavirus.data.gov.uk/api/v1/data?filters=areaType=overview&amp;structure=%7B%22areaType%22:%22areaType%22,%22areaName%22:%22areaName%22,%22areaCode%22:%22areaCode%22,</span><span style="color:#e6db74">%22d</span><span style="color:#e6db74">ate%22:</span><span style="color:#e6db74">%22d</span><span style="color:#e6db74">ate%22,%22newDeaths28DaysByDeathDate%22:%22newDeaths28DaysByDeathDate%22,</span><span style="color:#e6db74">%22c</span><span style="color:#e6db74">umDeaths28DaysByDeathDate%22:</span><span style="color:#e6db74">%22c</span><span style="color:#e6db74">umDeaths28DaysByDeathDate</span><span style="color:#e6db74">%22%</span><span style="color:#e6db74">7D&amp;format=csv&#34;</span>)
-positive_tests[<span style="color:#e6db74">&#39;positive_tests&#39;</span>] <span style="color:#f92672">=</span> positive_tests[<span style="color:#e6db74">&#39;newCasesBySpecimenDate&#39;</span>]
-num_deaths[<span style="color:#e6db74">&#39;num_deaths&#39;</span>] <span style="color:#f92672">=</span> num_deaths[<span style="color:#e6db74">&#39;newDeaths28DaysByDeathDate&#39;</span>]
-covid_uk_df <span style="color:#f92672">=</span> num_deaths[[<span style="color:#e6db74">&#39;date&#39;</span>, <span style="color:#e6db74">&#39;num_deaths&#39;</span>]]<span style="color:#f92672">.</span>merge(positive_tests[[<span style="color:#e6db74">&#39;date&#39;</span>, <span style="color:#e6db74">&#39;positive_tests&#39;</span>]], on<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;date&#39;</span>)
-covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>] <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>to_datetime(covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>])
-<span style="color:#75715e"># Check there&#39;s not duplicates</span>
-<span style="color:#66d9ef">assert</span> len(set(covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>])) <span style="color:#f92672">==</span> len(covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>])
-covid_uk_df</code></pre></div>
-<div>
+<p>We can see from the plot above that initially there is quite a strong relationship between Apple and American Express prices. This is weakened when the American Express price starts to fall. But after this the relationship appears to get stronger again. This suggests a model that accounts for the fact that relationships change through time might be better. It also suggests that most of the time these stocks are imbalanced: they tend to move together.</p>
+<h2 id="step-2-adding-weights">
+  Step 2: Adding weights
+  <a class="heading-link" href="#step-2-adding-weights">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>Now we need to decide how to weight the observations. There are lots of options here, which is a bit confusing.</p>
+<p>I tend to use the same weights as used in <a href="https://otexts.com/fpp3/ses.html">exponential smoothing models</a>. Why? Exponential smoothing is a popular, simple forecasting method that has been around for over 60 years! It&rsquo;s tried and tested, and has not gone away.</p>
+<p>Let&rsquo;s set \(T\) to be the time of the most recent observation, \(t\) to be the time of the observation we&rsquo;re interested in, and \(\gamma\) to be a hyperparameter we pick that&rsquo;s between 0 and 1. Then I set my weights \(w\) to be</p>
+<p>\begin{equation}
+w = \gamma^{[T-t]}.
+\end{equation}</p>
+<p>What does this mean? Suppose we set \(\gamma = 0.95\). Then if my observation is made at the most recent time point, its weight will be 1. If it&rsquo;s made at the second most recent time point, its weight will be 0.95. If it&rsquo;s made at the 10th most recent time point, its weight will be \(\gamma^{10} = 0.95^{10} \approx 0.6\). Essentially our weight smoothly decreases to nothing as the observation gets older and older.</p>
+<p>An unfortunate side effect to this is we&rsquo;ve added a hyperparameter to tune. I often just quickly do this by eye looking at the data, but you can also tune this in the normal way using cross-validation or AIC/BIC. For this tutorial, I&rsquo;ll just set it to 0.8.</p>
+<p>Let&rsquo;s add weights to our data now:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Set hyperparam</span>
+gamma <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.8</span>
+<span style="color:#75715e"># Check both stocks go up to the same date</span>
+most_recent_date <span style="color:#f92672">=</span> snp_df[<span style="color:#e6db74">&#39;date&#39;</span>]<span style="color:#f92672">.</span>max()
+days_before_recent_date <span style="color:#f92672">=</span> (most_recent_date <span style="color:#f92672">-</span> snp_df[<span style="color:#e6db74">&#39;date&#39;</span>])<span style="color:#f92672">.</span>dt<span style="color:#f92672">.</span>days
+snp_df[<span style="color:#e6db74">&#39;weight&#39;</span>] <span style="color:#f92672">=</span> gamma <span style="color:#f92672">**</span> days_before_recent_date<span style="color:#f92672">.</span>values
+snp_df
+</code></pre></div><div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
         vertical-align: middle;
@@ -233,165 +264,48 @@ covid_uk_df</code></pre></div>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th></th>
+      <th>Name</th>
       <th>date</th>
-      <th>num_deaths</th>
-      <th>positive_tests</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>2021-05-05</td>
-      <td>8</td>
-      <td>2229</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2021-05-04</td>
-      <td>9</td>
-      <td>2524</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>2021-05-03</td>
-      <td>6</td>
-      <td>2145</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>2021-05-02</td>
-      <td>9</td>
-      <td>1502</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>2021-05-01</td>
-      <td>8</td>
-      <td>1388</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>425</th>
-      <td>2020-03-06</td>
-      <td>0</td>
-      <td>81</td>
-    </tr>
-    <tr>
-      <th>426</th>
-      <td>2020-03-05</td>
-      <td>3</td>
-      <td>50</td>
-    </tr>
-    <tr>
-      <th>427</th>
-      <td>2020-03-04</td>
-      <td>0</td>
-      <td>56</td>
-    </tr>
-    <tr>
-      <th>428</th>
-      <td>2020-03-03</td>
-      <td>2</td>
-      <td>56</td>
-    </tr>
-    <tr>
-      <th>429</th>
-      <td>2020-03-02</td>
-      <td>1</td>
-      <td>39</td>
-    </tr>
-  </tbody>
-</table>
-<p>430 rows × 3 columns</p>
-</div>
-<h2 id="step-2-adding-weights">
-  Step 2: Adding weights
-  <a class="heading-link" href="#step-2-adding-weights">
-    <i class="fa fa-link" aria-hidden="true"></i>
-  </a>
-</h2>
-<p>Now we need to decide how to weight the observations. There are lots of options here, which is a bit confusing.</p>
-<p>I tend to use the same weights as used in <a href="https://otexts.com/fpp3/ses.html">exponential smoothing models</a>. Why? Exponential smoothing is a popular, simple forecasting method that has been around for over 60 years! It&rsquo;s tried and tested, and has not gone away.</p>
-<p>Let&rsquo;s set \(T\) to be the time of the most recent observation, \(t\) to be the time of the observation we&rsquo;re interested in, and \(\gamma\) to be a hyperparameter we pick that&rsquo;s between 0 and 1. Then I set my weights \(w\) to be</p>
-<p>\[
-w = \gamma^{[T-t]}.
-\]</p>
-<p>What does this mean? Suppose we set \(\gamma = 0.95\). Then if my observation is made at the most recent time point, its weight will be 1. If it&rsquo;s made at the second most recent time point, its weight will be 0.95. If it&rsquo;s made at the 10th most recent time point, its weight will be \(\gamma^{10} = 0.95^{10} \approx 0.6\). Essentially our weight smoothly decreases to nothing as the observation gets older and older.</p>
-<p>An unfortunate side effect to this is we&rsquo;ve added a hyperparameter to tune. I often just quickly do this by eye looking at the data, but you can also tune this in the normal way using cross-validation or AIC/BIC. For this tutorial, I&rsquo;ll just set it to 0.9.</p>
-<p>Let&rsquo;s add weights to our data now:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Set hyperparam</span>
-gamma <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.9</span>
-most_recent_date <span style="color:#f92672">=</span> covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>]<span style="color:#f92672">.</span>max()
-days_before_recent_date <span style="color:#f92672">=</span> (most_recent_date <span style="color:#f92672">-</span> covid_uk_df[<span style="color:#e6db74">&#39;date&#39;</span>])<span style="color:#f92672">.</span>dt<span style="color:#f92672">.</span>days
-covid_uk_df[<span style="color:#e6db74">&#39;weight&#39;</span>] <span style="color:#f92672">=</span> gamma <span style="color:#f92672">**</span> days_before_recent_date<span style="color:#f92672">.</span>values
-covid_uk_df
-</code></pre></div>
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>date</th>
-      <th>num_deaths</th>
-      <th>positive_tests</th>
+      <th>AAPL</th>
+      <th>AXP</th>
       <th>weight</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>2021-05-05</td>
-      <td>8</td>
-      <td>2229</td>
-      <td>1.000000e+00</td>
+      <td>2013-02-08</td>
+      <td>67.8542</td>
+      <td>61.80</td>
+      <td>1.377927e-177</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>2021-05-04</td>
-      <td>9</td>
-      <td>2524</td>
-      <td>9.000000e-01</td>
+      <td>2013-02-11</td>
+      <td>68.5614</td>
+      <td>61.98</td>
+      <td>2.691264e-177</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>2021-05-03</td>
-      <td>6</td>
-      <td>2145</td>
-      <td>8.100000e-01</td>
+      <td>2013-02-12</td>
+      <td>66.8428</td>
+      <td>62.20</td>
+      <td>3.364080e-177</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>2021-05-02</td>
-      <td>9</td>
-      <td>1502</td>
-      <td>7.290000e-01</td>
+      <td>2013-02-13</td>
+      <td>66.7156</td>
+      <td>62.10</td>
+      <td>4.205100e-177</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>2021-05-01</td>
-      <td>8</td>
-      <td>1388</td>
-      <td>6.561000e-01</td>
+      <td>2013-02-14</td>
+      <td>66.6556</td>
+      <td>62.34</td>
+      <td>5.256375e-177</td>
     </tr>
     <tr>
       <th>...</th>
@@ -401,45 +315,44 @@ covid_uk_df
       <td>...</td>
     </tr>
     <tr>
-      <th>425</th>
-      <td>2020-03-06</td>
-      <td>0</td>
-      <td>81</td>
-      <td>3.573276e-20</td>
+      <th>1254</th>
+      <td>2018-02-01</td>
+      <td>167.7800</td>
+      <td>100.00</td>
+      <td>2.621440e-01</td>
     </tr>
     <tr>
-      <th>426</th>
-      <td>2020-03-05</td>
-      <td>3</td>
-      <td>50</td>
-      <td>3.215948e-20</td>
+      <th>1255</th>
+      <td>2018-02-02</td>
+      <td>160.5000</td>
+      <td>96.68</td>
+      <td>3.276800e-01</td>
     </tr>
     <tr>
-      <th>427</th>
-      <td>2020-03-04</td>
-      <td>0</td>
-      <td>56</td>
-      <td>2.894353e-20</td>
+      <th>1256</th>
+      <td>2018-02-05</td>
+      <td>156.4900</td>
+      <td>92.01</td>
+      <td>6.400000e-01</td>
     </tr>
     <tr>
-      <th>428</th>
-      <td>2020-03-03</td>
-      <td>2</td>
-      <td>56</td>
-      <td>2.604918e-20</td>
+      <th>1257</th>
+      <td>2018-02-06</td>
+      <td>163.0300</td>
+      <td>94.18</td>
+      <td>8.000000e-01</td>
     </tr>
     <tr>
-      <th>429</th>
-      <td>2020-03-02</td>
-      <td>1</td>
-      <td>39</td>
-      <td>2.344426e-20</td>
+      <th>1258</th>
+      <td>2018-02-07</td>
+      <td>159.5400</td>
+      <td>93.61</td>
+      <td>1.000000e+00</td>
     </tr>
   </tbody>
 </table>
-<p>430 rows × 4 columns</p>
+<p>1259 rows × 4 columns</p>
 </div>
-
 <h2 id="step-3-fit-your-model">
   Step 3: Fit your model
   <a class="heading-link" href="#step-3-fit-your-model">
@@ -452,34 +365,40 @@ covid_uk_df
 <p>Let&rsquo;s fit our model using sklearn&rsquo;s linear regression:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">weighted_model <span style="color:#f92672">=</span> LinearRegression()
 weighted_results <span style="color:#f92672">=</span> weighted_model<span style="color:#f92672">.</span>fit(
-    X<span style="color:#f92672">=</span>covid_uk_df[[<span style="color:#e6db74">&#39;positive_tests&#39;</span>]],
-    y<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;num_deaths&#39;</span>], 
-    sample_weight<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;weight&#39;</span>]
+    X<span style="color:#f92672">=</span>snp_df[[<span style="color:#e6db74">&#39;AAPL&#39;</span>]],
+    y<span style="color:#f92672">=</span>snp_df[<span style="color:#e6db74">&#39;AXP&#39;</span>], 
+    sample_weight<span style="color:#f92672">=</span>snp_df[<span style="color:#e6db74">&#39;weight&#39;</span>]
 )
 <span style="color:#75715e"># Return the R^2 score for our model</span>
 r2_weighted <span style="color:#f92672">=</span> weighted_results<span style="color:#f92672">.</span>score(
-    X<span style="color:#f92672">=</span>covid_uk_df[[<span style="color:#e6db74">&#39;positive_tests&#39;</span>]],
-    y<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;num_deaths&#39;</span>], 
-    sample_weight<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;weight&#39;</span>]
+    X<span style="color:#f92672">=</span>snp_df[[<span style="color:#e6db74">&#39;AAPL&#39;</span>]],
+    y<span style="color:#f92672">=</span>snp_df[<span style="color:#e6db74">&#39;AXP&#39;</span>], 
+    sample_weight<span style="color:#f92672">=</span>snp_df[<span style="color:#e6db74">&#39;weight&#39;</span>]
 )
-f<span style="color:#e6db74">&#34;R^2 score for the weighted model is {r2_weighted}&#34;</span>
-</code></pre></div><pre><code>'R^2 score for the weighted model is 0.5247115256308429'
+<span style="color:#66d9ef">print</span>(f<span style="color:#e6db74">&#34;R^2 score for the weighted model is {r2_weighted}&#34;</span>)
+
+<span style="color:#66d9ef">print</span>(f<span style="color:#e6db74">&#34;Linear coefficient of relationship of Apple to American Express is {weighted_model.coef_[0]}&#34;</span>)
+</code></pre></div><pre><code>R^2 score for the weighted model is 0.740848229773393
+Linear coefficient of relationship of Apple to American Express is 0.4810444526330664
 </code></pre>
 <p>Let&rsquo;s compare this to an unweighted model:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">unweighted_model <span style="color:#f92672">=</span> LinearRegression()
-unweighted_results <span style="color:#f92672">=</span> weighted_model<span style="color:#f92672">.</span>fit(
-    X<span style="color:#f92672">=</span>covid_uk_df[[<span style="color:#e6db74">&#39;positive_tests&#39;</span>]],
-    y<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;num_deaths&#39;</span>]
+unweighted_results <span style="color:#f92672">=</span> unweighted_model<span style="color:#f92672">.</span>fit(
+    X<span style="color:#f92672">=</span>snp_df[[<span style="color:#e6db74">&#39;AAPL&#39;</span>]],
+    y<span style="color:#f92672">=</span>snp_df[<span style="color:#e6db74">&#39;AXP&#39;</span>]
 )
 <span style="color:#75715e"># Return the R^2 score for our model</span>
 r2_unweighted <span style="color:#f92672">=</span> unweighted_results<span style="color:#f92672">.</span>score(
-    X<span style="color:#f92672">=</span>covid_uk_df[[<span style="color:#e6db74">&#39;positive_tests&#39;</span>]],
-    y<span style="color:#f92672">=</span>covid_uk_df[<span style="color:#e6db74">&#39;num_deaths&#39;</span>]
+    X<span style="color:#f92672">=</span>snp_df[[<span style="color:#e6db74">&#39;AAPL&#39;</span>]],
+    y<span style="color:#f92672">=</span>snp_df[<span style="color:#e6db74">&#39;AXP&#39;</span>]
 )
-f<span style="color:#e6db74">&#34;R^2 score for the unweighted model is {r2_unweighted}&#34;</span>
-</code></pre></div><pre><code>'R^2 score for the unweighted model is 0.39299060569674615'
+<span style="color:#66d9ef">print</span>(f<span style="color:#e6db74">&#34;R^2 score for the unweighted model is {r2_unweighted}&#34;</span>)
+
+<span style="color:#66d9ef">print</span>(f<span style="color:#e6db74">&#34;Linear coefficient of relationship of Apple to American Express is {unweighted_model.coef_[0]}&#34;</span>)
+</code></pre></div><pre><code>R^2 score for the unweighted model is 0.1161401914047755
+Linear coefficient of relationship of Apple to American Express is 0.12149913600503894
 </code></pre>
-<p>In this case we&rsquo;ve improved our in-sample fit significantly. Since regular testing is likely to continue in the UK, our weighted model should provide better out-of-sample predictions as well.</p>
+<p>In this case we&rsquo;ve improved our in-sample fit significantly by using the weighted model. The coefficient is larger for the weighted model. This suggests that while previously, these stocks have not been that related, recently the stocks have become less balanced. This makes sense from what we saw when we plotted the two timeseries. This would be an increasing risk for our portfolio.</p>
 
       </div>
 
