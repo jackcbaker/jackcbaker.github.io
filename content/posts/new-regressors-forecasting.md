@@ -141,7 +141,7 @@ Often a backtest of the best forecasting method so far is already at
 hand from other experiments, which is the most computationally demanding
 part of this method.
 
-To demo this practically, we’ll use `R`. For all the packages used in
+To demo this practically, we’ll use `R`. Follow along with the [interactive Rmarkdown](https://github.com/jackcbaker/blog-notebooks/blob/main/checking_regressors.Rmd) for this tutorial on [my github](https://github.com/jackcbaker). For all the packages used in
 this tutorial, download the [FPP3
 package](https://mran.microsoft.com/snapshot/2020-10-09/web/packages/fpp3/index.html)
 by running in `R` `install.packages('fpp3')`. This package is a

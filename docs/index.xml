@@ -165,7 +165,7 @@ measuring predictive quality of a regressor, with computational cost.
 Often a backtest of the best forecasting method so far is already at
 hand from other experiments, which is the most computationally demanding
 part of this method.&lt;/p&gt;
-&lt;p&gt;To demo this practically, we’ll use &lt;code&gt;R&lt;/code&gt;. For all the packages used in
+&lt;p&gt;To demo this practically, we’ll use &lt;code&gt;R&lt;/code&gt;. Follow along with the &lt;a href=&#34;https://github.com/jackcbaker/blog-notebooks/blob/main/checking_regressors.Rmd&#34;&gt;interactive Rmarkdown&lt;/a&gt; for this tutorial on &lt;a href=&#34;https://github.com/jackcbaker&#34;&gt;my github&lt;/a&gt;. For all the packages used in
 this tutorial, download the &lt;a href=&#34;https://mran.microsoft.com/snapshot/2020-10-09/web/packages/fpp3/index.html&#34;&gt;FPP3
 package&lt;/a&gt;
 by running in &lt;code&gt;R&lt;/code&gt; &lt;code&gt;install.packages(&#39;fpp3&#39;)&lt;/code&gt;. This package is a
