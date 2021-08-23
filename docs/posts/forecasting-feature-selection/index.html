@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="color-scheme" content="light dark">
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+
+    
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; block-all-mixed-content; default-src 'self'; child-src 'self'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net/; form-action 'self'; frame-src 'self'; img-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/ https://cdn.jsdelivr.net/; script-src 'self' 'unsafe-inline' https://www.google-analytics.com; prefetch-src 'self';">
+    
+
+    <meta name="author" content="Jack Baker">
+    <meta name="description" content="Features are not guaranteed to improve forecast performance. In this article we explain why, and how to perform feature selection for forecasting algorithms.">
+    <meta name="keywords" content="blog,data science">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Feature selection for forecasting algorithms"/>
+<meta name="twitter:description" content="Features are not guaranteed to improve forecast performance. In this article we explain why, and how to perform feature selection for forecasting algorithms."/>
+
+    <meta property="og:title" content="Feature selection for forecasting algorithms" />
+<meta property="og:description" content="Features are not guaranteed to improve forecast performance. In this article we explain why, and how to perform feature selection for forecasting algorithms." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://jackbakerds.com/posts/forecasting-feature-selection/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-08-23T20:48:31&#43;01:00" />
+<meta property="article:modified_time" content="2021-08-23T20:48:31&#43;01:00" />
+
+
+
+    <title>
+  Feature selection for forecasting algorithms · Jack Baker
+</title>
+
+    
+      <link rel="canonical" href="https://jackbakerds.com/posts/forecasting-feature-selection/">
+    
+
+    <link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.1.7" as="font" type="font/woff2" crossorigin>
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.eb7743f94930acfd17146aecc1f80e86fe35b3e451f2ec0c98485f9c4d962f34.css" integrity="sha256-63dD&#43;UkwrP0XFGrswfgOhv41s&#43;RR8uwMmEhfnE2WLzQ=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.dde8a61eb31a32353b4baf3d9113f03c4ea2a8ca9bb736f59ca2d2b2cb664f0b.css" integrity="sha256-3eimHrMaMjU7S689kRPwPE6iqMqbtzb1nKLSsstmTws=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+
+    <meta name="generator" content="Hugo 0.82.0" />
+  </head>
+
+  
+  
+    
+  
+  <body class="preload-transitions colorscheme-auto"
+        onload=""
+  >
+    
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Jack Baker
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://jackbakerds.com/posts/forecasting-feature-selection/">
+              Feature selection for forecasting algorithms
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2021-08-23T20:48:31&#43;01:00'>
+                August 23, 2021
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              10-minute read
+            </span>
+          </div>
+          <div class="authors">
+    <i class="fa fa-user" aria-hidden="true"></i>
+      <a href="/authors/jack-baker/">Jack Baker</a></div> 
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <a href="/tags/data-science/">data science</a>
+      <span class="separator">•</span>
+    <a href="/tags/machine-learning/">machine learning</a>
+      <span class="separator">•</span>
+    <a href="/tags/r/">R</a>
+      <span class="separator">•</span>
+    <a href="/tags/forecasting/">forecasting</a>
+      <span class="separator">•</span>
+    <a href="/tags/statistics/">statistics</a></div>
+
+          <a href=https://twitter.com/jackbakerds target="_blank">
+    <i class="bi bi-twitter"></i> Follow me on Twitter
+</a>
+        </div>
+      </header>
+
+      <div>
+        
+        <p>In this article, we talk feature selection for forecasting. We start by explaining why you should
+think twice before adding features to your forecasts; then we talk
+about some ways to do feature selection for forecasting models. To put things in practical terms, we demo
+a feature selection method that has a decent balance between performance and computational
+cost in <code>R</code>.</p>
+<h1 id="why-you-should-think-twice-before-including-features-in-your-forecasting-models">
+  Why you should think twice before including features in your forecasting models?
+  <a class="heading-link" href="#why-you-should-think-twice-before-including-features-in-your-forecasting-models">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h1>
+<p>For many data science models, the more features (often referred to as
+regressors in forecasting), the better your model accuracy will be. But
+forecasting is quite finickity, and this is often not the case.</p>
+<h3 id="why-is-this">
+  Why is this?
+  <a class="heading-link" href="#why-is-this">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>We’ll break this down into a few points.</p>
+<ol>
+<li>
+<p>Let’s imagine you want to forecast whether a coin will land heads or
+tails. That’s going to be a non-starter. This is because the
+variable you’re trying to forecast (let’s call it the target), is
+completely random. Some targets just don’t have any signal at all,
+or don’t have any regressors that provide any signal.</p>
+</li>
+<li>
+<p>Let’s call the observations of the variable you have already seen
+the actuals. These will often contain a surprising amount of
+information already. The forecasting algorithm you’re using will be
+hell bent on picking up on this signal. Which means your feature
+doesn’t just have to be correlated with the target, it has to
+provide information that the actuals don’t. This is much rarer. For
+example, ice cream sales will be correlated with the weather, but it
+definitely won’t contain any more information than in the actuals.</p>
+</li>
+<li>
+<p>You either need to know your regressor ahead of time (it needs to be
+<em>forward facing</em>), or you need to forecast that regressor as well.
+Going back to the ice cream example, this regressor is not forward
+facing. So if you want to know the weather a week from now, you’ll
+have to forecast ice cream sales ahead by a week, and then feed that
+into your forecasting algorithm. This adds a lot of noise to your
+regressor, which in turn adds noise to your forecast and makes it
+worse. It is rarely worth doing.</p>
+</li>
+<li>
+<p>Even forward facing regressors frequently add unintended noise to
+your forecast, just because there is not enough signal, similar to
+points 1 and 2.</p>
+</li>
+</ol>
+<h1 id="some-ways-to-perform-feature-selection-for-a-forecasting-algorithm">
+  Some ways to perform feature selection for a forecasting algorithm
+  <a class="heading-link" href="#some-ways-to-perform-feature-selection-for-a-forecasting-algorithm">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h1>
+<p>There are a few ways to check if a regressor provides any useful
+information to a forecast. Most of these rely on a <em>walkforward
+backtest</em>. A walkforward backtest is where you start at a historic date
+(called the train upto date), you forecast using only data up to that
+date, then you move up to the next date and repeat, until you reach the
+present.</p>
+<p>Then to evaluate your forecast, you can calculate the forecast error
+compared with actuals. So it is a lot like a train/test set split in
+classic data science problems. A tutorial of this technique is
+<a href="https://machinelearningmastery.com/backtest-machine-learning-models-time-series-forecasting/">here</a>.
+If you have two forecasts you want to decide between, you can run a
+backtest for each of them. The one with the lowest error would be
+classed as the best.</p>
+<p>With this, here are some ways to perform feature selection, in order of
+increasing computational and time cost:</p>
+<h3 id="1-look-at-correlations-between-the-actuals-and-the-regressor">
+  1. Look at correlations between the actuals and the regressor.
+  <a class="heading-link" href="#1-look-at-correlations-between-the-actuals-and-the-regressor">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>This just checks the regressor using in-sample fit, and does not cover
+point 2 in the previous section (does the regressor contain information
+the forecast doesn’t). This option is not recommended.</p>
+<h3 id="2-use-the-akaike-information-criterion-aic-of-the-forecast">
+  2. Use the Akaike Information Criterion (AIC) of the forecast.
+  <a class="heading-link" href="#2-use-the-akaike-information-criterion-aic-of-the-forecast">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>This is a statistical approximation that tries to use insample fit to
+approximate predictive fit. See <a href="https://otexts.com/fpp3/estimation-and-model-selection.html">this
+chapter</a>
+for using the AIC for model selection.</p>
+<p>The way this would work is you would fit your forecasting model both
+with and without the regressor, and check the AIC of each. The model
+with the lowest AIC would be the one you would pick.</p>
+<p>This method is good, fast, and commonly used. But it is an approximation
+that only uses insample fit, so may not give a good estimate of
+predictive fit.</p>
+<h3 id="3-use-linear-regression-on-the-actuals-with-both-the-current-forecast-and-your-regressor-as-a-feature">
+  3. Use linear regression on the actuals with both the current forecast and your regressor as a feature
+  <a class="heading-link" href="#3-use-linear-regression-on-the-actuals-with-both-the-current-forecast-and-your-regressor-as-a-feature">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>The key to this method is getting around point 2. We want to check how
+much additional predictive information our regressor gives after taking
+into account the information the forecast has learned.</p>
+<p>For this method we run a single backtest using the current forecast
+without regressors. Then we feed both the regressor and the forecast
+through a linear regression that is trying to learn the actuals.</p>
+<p>To assess how good the regressor is, we can examine whether the
+regressor is significant in the standard way you would assess a linear
+regression (i.e. check its p-value is sufficiently small). Because we
+have also included the forecast itself in the regression, this
+regression should account for what is already learned by the forecasting
+algorithm.</p>
+<p>This method assesses predictive fit directly, but only needs to run one
+backtest. The method works particularly well when you have many
+regressors to check. You still just have to fit one backtest (the
+current forecast with no regressors), then you can use standard
+techniques for model selection in linear regression, such as recursive
+feature elimination (make sure you don’t eliminate your forecast
+though)!</p>
+<h3 id="4-run-a-forecast-backtest-with-and-without-the-regressor">
+  4. Run a forecast backtest with and without the regressor
+  <a class="heading-link" href="#4-run-a-forecast-backtest-with-and-without-the-regressor">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>This method is quite simple, we run a backtest both with a forecast
+using the regressor, and without. We then compare the error of the two.
+If the error of the forecast with the regressor is significantly lower,
+we might use that regressor going forward.</p>
+<p>Backtests are bread and butter of model selection in forecasting. So
+this method works well.</p>
+<p>But as the number of regressors goes up, this method gets prohibitively
+expensive. We have to fit multiple forecasting models on each of the
+train upto dates.</p>
+<h1 id="demoing-method-3">
+  Demoing method 3
+  <a class="heading-link" href="#demoing-method-3">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h1>
+<p>We choose to demo method 3, as it offers a good balance between directly
+measuring predictive quality of a regressor, with computational cost.
+Often a backtest of the best forecasting method so far is already at
+hand from other experiments, which is the most computationally demanding
+part of this method.</p>
+<p>To demo this practically, we’ll use <code>R</code>. For all the packages used in
+this tutorial, download the <a href="https://mran.microsoft.com/snapshot/2020-10-09/web/packages/fpp3/index.html">FPP3
+package</a>
+by running in <code>R</code> <code>install.packages('fpp3')</code>. This package is a
+companion to the amazing <a href="https://otexts.com/fpp3/">introductory forecasting
+book</a> by Rob Hyndman.</p>
+<p>The data we’ll use, is the US consumption expenditure data from the
+book. This is a time series of quarterly percentage changes of various
+measures in the US economy. The one we’re interested in forecasting is
+economic production, which is a measure of the health of the US economy.
+It can be accessed after loading in <code>fpp3</code>, and is called <code>us_change</code>.
+The column we want to forecast is <code>Production</code>. Let’s plot it</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">    <span style="color:#a6e22e">library</span>(fpp3)
+
+    us_change <span style="color:#f92672">%&gt;%</span>
+        <span style="color:#a6e22e">autoplot</span>(Production) <span style="color:#f92672">+</span>
+        <span style="color:#a6e22e">labs</span>(y <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Production (% change)&#34;</span>)
+</code></pre></div>
+<figure >
+    <style scoped>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    
+        <img src="/post_images/feature-selection-forecasting/plot_actuals-1.png" alt="Plot of US % change production over time" class="center" />
+    
+    
+    <figcaption>
+        <p>
+        Plot of US % change production over time.
+        
+            
+        
+        </p> 
+    </figcaption>
+    
+</figure>
+
+<p>To forecast this data, we’ll fit an <a href="https://otexts.com/fpp3/expsmooth.html">ARIMA
+model</a> to this data, which
+allows regressors to be added.</p>
+<p>To fit the linear regression on the features we need to check, we’ll
+need to run a backtest on our forecasting algorithm with no regressors.
+Let’s backtest our forecasting model on the last 50 data points, and
+forecast one-step ahead. The <code>ARIMA</code> function will automatically perform
+parameter tuning for the ARIMA model using AIC.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">    <span style="color:#75715e"># Set seed for reproducibility</span>
+    <span style="color:#a6e22e">set.seed</span>(<span style="color:#ae81ff">13</span>)
+    backtest_size <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">50</span>
+    n <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">nrow</span>(us_change)
+    backtest_results <span style="color:#f92672">&lt;-</span> us_change<span style="color:#a6e22e">[</span>(n <span style="color:#f92672">-</span> (backtest_size <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>))<span style="color:#f92672">:</span>n,]
+    backtest_results<span style="color:#f92672">$</span>forecast <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">rep</span>(<span style="color:#66d9ef">NA</span>, backtest_size)
+    <span style="color:#a6e22e">for </span>(backtest_num in backtest_size<span style="color:#f92672">:</span><span style="color:#ae81ff">1</span>) {
+        fit <span style="color:#f92672">&lt;-</span> us_change[1<span style="color:#f92672">:</span>(n <span style="color:#f92672">-</span> backtest_num),] <span style="color:#f92672">%&gt;%</span>
+            <span style="color:#a6e22e">select</span>(Production) <span style="color:#f92672">%&gt;%</span>
+            <span style="color:#a6e22e">model</span>(
+                forecast <span style="color:#f92672">=</span> <span style="color:#a6e22e">ARIMA</span>(Production)
+            )
+        backtest_fc <span style="color:#f92672">&lt;-</span> fit <span style="color:#f92672">%&gt;%</span> <span style="color:#a6e22e">forecast</span>(h <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>)
+        results_index <span style="color:#f92672">&lt;-</span> backtest_size <span style="color:#f92672">-</span> (backtest_num <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+        backtest_results<span style="color:#f92672">$</span>forecast[results_index] <span style="color:#f92672">&lt;-</span> backtest_fc<span style="color:#f92672">$</span>.mean
+    }
+
+Let’s plot our backtest results against actuals
+
+    backtest_results <span style="color:#f92672">%&gt;%</span>
+        <span style="color:#a6e22e">pivot_longer</span>(<span style="color:#a6e22e">c</span>(Production, forecast), names_to <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Type&#34;</span>) <span style="color:#f92672">%&gt;%</span>
+        <span style="color:#a6e22e">autoplot</span>(value)
+</code></pre></div>
+<figure >
+    <style scoped>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    
+        <img src="/post_images/feature-selection-forecasting/backtest_plot-1.png" alt="Plot of ARIMA backtest without regressors" class="center" />
+    
+    
+    <figcaption>
+        <p>
+        Plot of ARIMA backtest without regressors.
+        
+            
+        
+        </p> 
+    </figcaption>
+    
+</figure>
+
+<p>Notice that the forecast does fine during normal periods, but performs
+poorly during periods of large fluctuation. Can we use regressors to
+improve this?</p>
+<p>We have modelled production data, which is typically measured using GDP.
+But measuring GDP takes an enormous effort, and in many countries is
+only done every quarter. Other data can be easier to estimate more
+regularly, and is more readily available. One measure this might be true
+for is consumer spending. This is the <code>Consumption</code> column in our
+dataset.</p>
+<p>Let’s use a simple linear regression to see if using consumption as a
+regressor has any promise.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">    regress_test <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">lm</span>(Production <span style="color:#f92672">~</span> forecast <span style="color:#f92672">+</span> Consumption, data <span style="color:#f92672">=</span> backtest_results)
+    <span style="color:#a6e22e">summary</span>(regress_test)
+
+    <span style="color:#75715e">## </span>
+    <span style="color:#75715e">## Call:</span>
+    <span style="color:#75715e">## lm(formula = Production ~ forecast + Consumption, data = backtest_results)</span>
+    <span style="color:#75715e">## </span>
+    <span style="color:#75715e">## Residuals:</span>
+    <span style="color:#75715e">##     Min      1Q  Median      3Q     Max </span>
+    <span style="color:#75715e">## -2.4347 -0.7459  0.1566  0.5379  2.4470 </span>
+    <span style="color:#75715e">## </span>
+    <span style="color:#75715e">## Coefficients:</span>
+    <span style="color:#75715e">##             Estimate Std. Error t value Pr(&gt;|t|)    </span>
+    <span style="color:#75715e">## (Intercept)  -0.8588     0.1889  -4.545 3.84e-05 ***</span>
+    <span style="color:#75715e">## forecast      0.8750     0.1406   6.224 1.23e-07 ***</span>
+    <span style="color:#75715e">## Consumption   1.2630     0.3158   4.000 0.000223 ***</span>
+    <span style="color:#75715e">## ---</span>
+    <span style="color:#75715e">## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span>
+    <span style="color:#75715e">## </span>
+    <span style="color:#75715e">## Residual standard error: 0.9268 on 47 degrees of freedom</span>
+    <span style="color:#75715e">## Multiple R-squared:  0.6461, Adjusted R-squared:  0.6311 </span>
+    <span style="color:#75715e">## F-statistic: 42.91 on 2 and 47 DF,  p-value: 2.501e-11</span>
+</code></pre></div><p>The p-value is very low for the <code>Consumption</code> column, well below the
+classic 0.05 level. This indicates including it in the forecast should
+improve predictive performance.</p>
+<p>What about consumer savings (the <code>Savings</code> column in the dataset)?</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">    regress_test_savings <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">lm</span>(Production <span style="color:#f92672">~</span> forecast <span style="color:#f92672">+</span> Savings, data <span style="color:#f92672">=</span> backtest_results)
+    <span style="color:#a6e22e">summary</span>(regress_test_savings)
+
+    <span style="color:#75715e">## </span>
+    <span style="color:#75715e">## Call:</span>
+    <span style="color:#75715e">## lm(formula = Production ~ forecast + Savings, data = backtest_results)</span>
+    <span style="color:#75715e">## </span>
+    <span style="color:#75715e">## Residuals:</span>
+    <span style="color:#75715e">##     Min      1Q  Median      3Q     Max </span>
+    <span style="color:#75715e">## -3.1353 -0.5435  0.1223  0.6092  2.7229 </span>
+    <span style="color:#75715e">## </span>
+    <span style="color:#75715e">## Coefficients:</span>
+    <span style="color:#75715e">##             Estimate Std. Error t value Pr(&gt;|t|)    </span>
+    <span style="color:#75715e">## (Intercept) -0.34043    0.16657  -2.044   0.0466 *  </span>
+    <span style="color:#75715e">## forecast     1.08637    0.14867   7.307  2.8e-09 ***</span>
+    <span style="color:#75715e">## Savings     -0.01165    0.01029  -1.132   0.2633    </span>
+    <span style="color:#75715e">## ---</span>
+    <span style="color:#75715e">## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span>
+    <span style="color:#75715e">## </span>
+    <span style="color:#75715e">## Residual standard error: 1.059 on 47 degrees of freedom</span>
+    <span style="color:#75715e">## Multiple R-squared:  0.5383, Adjusted R-squared:  0.5186 </span>
+    <span style="color:#75715e">## F-statistic: 27.39 on 2 and 47 DF,  p-value: 1.299e-08</span>
+</code></pre></div><p>The p-value in this case is high, so we should not include savings in
+our model.</p>
+<p>Let’s check our choice by including consumption in the ARIMA model and
+running a new backtest</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">    backtest_regressor_results <span style="color:#f92672">&lt;-</span> backtest_results
+    backtest_regressor_results<span style="color:#f92672">$</span>forecast_consumption <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">rep</span>(<span style="color:#66d9ef">NA</span>, backtest_size)
+    <span style="color:#a6e22e">for </span>(backtest_num in backtest_size<span style="color:#f92672">:</span><span style="color:#ae81ff">1</span>) {
+        fit <span style="color:#f92672">&lt;-</span> us_change[1<span style="color:#f92672">:</span>(n <span style="color:#f92672">-</span> backtest_num),] <span style="color:#f92672">%&gt;%</span>
+            <span style="color:#a6e22e">select</span>(Quarter, Production, Consumption) <span style="color:#f92672">%&gt;%</span>
+            <span style="color:#a6e22e">model</span>(
+                forecast <span style="color:#f92672">=</span> <span style="color:#a6e22e">ARIMA</span>(Production <span style="color:#f92672">~</span> Consumption)
+            )
+        new_regressor <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">select</span>(us_change[n <span style="color:#f92672">-</span> (backtest_num <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>),], Quarter, Consumption)
+        backtest_fc <span style="color:#f92672">&lt;-</span> fit <span style="color:#f92672">%&gt;%</span> <span style="color:#a6e22e">forecast</span>(new_data <span style="color:#f92672">=</span> new_regressor)
+        results_index <span style="color:#f92672">&lt;-</span> backtest_size <span style="color:#f92672">-</span> (backtest_num <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+        backtest_regressor_results<span style="color:#f92672">$</span>forecast_consumption[results_index] <span style="color:#f92672">&lt;-</span> backtest_fc<span style="color:#f92672">$</span>.mean
+    }
+
+    <span style="color:#75715e"># Plot both backtests</span>
+    backtest_regressor_results <span style="color:#f92672">%&gt;%</span>
+        <span style="color:#a6e22e">pivot_longer</span>(<span style="color:#a6e22e">c</span>(Production, forecast, forecast_consumption), names_to <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Type&#34;</span>) <span style="color:#f92672">%&gt;%</span>
+        <span style="color:#a6e22e">autoplot</span>(value)
+</code></pre></div>
+<figure >
+    <style scoped>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    
+        <img src="/post_images/feature-selection-forecasting/regress_backtest-1.png" alt="Plot of ARIMA backtest with and without selected regressors" class="center" />
+    
+    
+    <figcaption>
+        <p>
+        Plot of ARIMA backtest with and without selected regressors.
+        
+            
+        
+        </p> 
+    </figcaption>
+    
+</figure>
+
+<p>It’s a little difficult to tell which forecast performed better by eye,
+so let’s check the MSE error</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">    backtest_regressor_results <span style="color:#f92672">%&gt;%</span>
+        <span style="color:#a6e22e">as_tibble</span>() <span style="color:#f92672">%&gt;%</span>
+        <span style="color:#a6e22e">summarise</span>(
+            MSE_no_regressors <span style="color:#f92672">=</span> <span style="color:#a6e22e">mean</span>((Production <span style="color:#f92672">-</span> forecast)^2),
+            MSE_consumption_regressor <span style="color:#f92672">=</span> <span style="color:#a6e22e">mean</span>((Production <span style="color:#f92672">-</span> forecast_consumption)^2)
+        )
+
+    <span style="color:#75715e">## # A tibble: 1 x 2</span>
+    <span style="color:#75715e">##   MSE_no_regressors MSE_consumption_regressor</span>
+    <span style="color:#75715e">##               &lt;dbl&gt;                     &lt;dbl&gt;</span>
+    <span style="color:#75715e">## 1              1.20                      1.01</span>
+</code></pre></div><p>The MSE is lower in the backtest including consumption as a regressor,
+so we probably made the right choice :).</p>
+<h1 id="key-points">
+  Key Points
+  <a class="heading-link" href="#key-points">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h1>
+<ul>
+<li>In forecasting, including features are not guaranteed to improve
+model performance, so think carefully before you do.</li>
+<li>Feature selection in forecasting is a trade off between selection
+performance and computational cost.</li>
+<li>A way to select features in forecasts that directly measures
+predictive performance, is to run a backtest of your forecast
+without regressors, then fit a linear regression model to learn
+actuals given your forecasts and the regressor. Select the regressor
+if the p-value is low.</li>
+</ul>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+      </footer>
+    </article>
+
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2021
+         Jack Baker 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+    </section>
+  </footer>
+
+
+    </main>
+
+    
+      
+      <script src="/js/coder.min.235666b114443867d43eeb5799d51f6252965e5163f338285e113fa381d3d27e.js" integrity="sha256-I1ZmsRREOGfUPutXmdUfYlKWXlFj8zgoXhE/o4HT0n4="></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>
