@@ -177,11 +177,11 @@ measures in the US economy. The one we’re interested in forecasting is
 economic production, which is a measure of the health of the US economy.
 It can be accessed after loading in &lt;code&gt;fpp3&lt;/code&gt;, and is called &lt;code&gt;us_change&lt;/code&gt;.
 The column we want to forecast is &lt;code&gt;Production&lt;/code&gt;. Let’s plot it&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;library&lt;/span&gt;(fpp3)
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;library&lt;/span&gt;(fpp3)
 
-    us_change &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;autoplot&lt;/span&gt;(Production) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt;
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;labs&lt;/span&gt;(y &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Production (% change)&amp;#34;&lt;/span&gt;)
+us_change &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;autoplot&lt;/span&gt;(Production) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;labs&lt;/span&gt;(y &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Production (% change)&amp;#34;&lt;/span&gt;)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;figure &gt;
     &lt;style scoped&gt;
@@ -214,28 +214,28 @@ need to run a backtest on our forecasting algorithm with no regressors.
 Let’s backtest our forecasting model on the last 50 data points, and
 forecast one-step ahead. The &lt;code&gt;ARIMA&lt;/code&gt; function will automatically perform
 parameter tuning for the ARIMA model using AIC.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;# Set seed for reproducibility&lt;/span&gt;
-    &lt;span style=&#34;color:#a6e22e&#34;&gt;set.seed&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;13&lt;/span&gt;)
-    backtest_size &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;50&lt;/span&gt;
-    n &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;nrow&lt;/span&gt;(us_change)
-    backtest_results &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; us_change&lt;span style=&#34;color:#a6e22e&#34;&gt;[&lt;/span&gt;(n &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; (backtest_size &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;))&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;n,]
-    backtest_results&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;forecast &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rep&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;NA&lt;/span&gt;, backtest_size)
-    &lt;span style=&#34;color:#a6e22e&#34;&gt;for &lt;/span&gt;(backtest_num in backtest_size&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;) {
-        fit &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; us_change[1&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;(n &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; backtest_num),] &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-            &lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;(Production) &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-            &lt;span style=&#34;color:#a6e22e&#34;&gt;model&lt;/span&gt;(
-                forecast &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ARIMA&lt;/span&gt;(Production)
-            )
-        backtest_fc &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; fit &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;forecast&lt;/span&gt;(h &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
-        results_index &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_size &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; (backtest_num &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
-        backtest_results&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;forecast[results_index] &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_fc&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;.mean
-    }
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Set seed for reproducibility&lt;/span&gt;
+&lt;span style=&#34;color:#a6e22e&#34;&gt;set.seed&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;13&lt;/span&gt;)
+backtest_size &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;50&lt;/span&gt;
+n &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;nrow&lt;/span&gt;(us_change)
+backtest_results &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; us_change&lt;span style=&#34;color:#a6e22e&#34;&gt;[&lt;/span&gt;(n &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; (backtest_size &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;))&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;n,]
+backtest_results&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;forecast &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rep&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;NA&lt;/span&gt;, backtest_size)
+&lt;span style=&#34;color:#a6e22e&#34;&gt;for &lt;/span&gt;(backtest_num in backtest_size&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;) {
+    fit &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; us_change[1&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;(n &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; backtest_num),] &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;(Production) &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;model&lt;/span&gt;(
+            forecast &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ARIMA&lt;/span&gt;(Production)
+        )
+    backtest_fc &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; fit &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;forecast&lt;/span&gt;(h &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
+    results_index &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_size &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; (backtest_num &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
+    backtest_results&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;forecast[results_index] &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_fc&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;.mean
+}
 
-Let’s plot our backtest results against actuals
+&lt;span style=&#34;color:#75715e&#34;&gt;# Let’s plot our backtest results against actuals&lt;/span&gt;
 
-    backtest_results &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;pivot_longer&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt;(Production, forecast), names_to &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Type&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;autoplot&lt;/span&gt;(value)
+backtest_results &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;pivot_longer&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt;(Production, forecast), names_to &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Type&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;autoplot&lt;/span&gt;(value)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;figure &gt;
     &lt;style scoped&gt;
@@ -271,76 +271,76 @@ for is consumer spending. This is the &lt;code&gt;Consumption&lt;/code&gt; colum
 dataset.&lt;/p&gt;
 &lt;p&gt;Let’s use a simple linear regression to see if using consumption as a
 regressor has any promise.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;    regress_test &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;lm&lt;/span&gt;(Production &lt;span style=&#34;color:#f92672&#34;&gt;~&lt;/span&gt; forecast &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; Consumption, data &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; backtest_results)
-    &lt;span style=&#34;color:#a6e22e&#34;&gt;summary&lt;/span&gt;(regress_test)
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;regress_test &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;lm&lt;/span&gt;(Production &lt;span style=&#34;color:#f92672&#34;&gt;~&lt;/span&gt; forecast &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; Consumption, data &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; backtest_results)
+&lt;span style=&#34;color:#a6e22e&#34;&gt;summary&lt;/span&gt;(regress_test)
 
-    &lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Call:&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## lm(formula = Production ~ forecast + Consumption, data = backtest_results)&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Residuals:&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;##     Min      1Q  Median      3Q     Max &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## -2.4347 -0.7459  0.1566  0.5379  2.4470 &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Coefficients:&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;##             Estimate Std. Error t value Pr(&amp;gt;|t|)    &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## (Intercept)  -0.8588     0.1889  -4.545 3.84e-05 ***&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## forecast      0.8750     0.1406   6.224 1.23e-07 ***&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Consumption   1.2630     0.3158   4.000 0.000223 ***&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## ---&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Residual standard error: 0.9268 on 47 degrees of freedom&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Multiple R-squared:  0.6461, Adjusted R-squared:  0.6311 &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## F-statistic: 42.91 on 2 and 47 DF,  p-value: 2.501e-11&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Call:&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## lm(formula = Production ~ forecast + Consumption, data = backtest_results)&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Residuals:&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;##     Min      1Q  Median      3Q     Max &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## -2.4347 -0.7459  0.1566  0.5379  2.4470 &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Coefficients:&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;##             Estimate Std. Error t value Pr(&amp;gt;|t|)    &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## (Intercept)  -0.8588     0.1889  -4.545 3.84e-05 ***&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## forecast      0.8750     0.1406   6.224 1.23e-07 ***&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Consumption   1.2630     0.3158   4.000 0.000223 ***&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## ---&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Residual standard error: 0.9268 on 47 degrees of freedom&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Multiple R-squared:  0.6461, Adjusted R-squared:  0.6311 &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## F-statistic: 42.91 on 2 and 47 DF,  p-value: 2.501e-11&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The p-value is very low for the &lt;code&gt;Consumption&lt;/code&gt; column, well below the
 classic 0.05 level. This indicates including it in the forecast should
 improve predictive performance.&lt;/p&gt;
 &lt;p&gt;What about consumer savings (the &lt;code&gt;Savings&lt;/code&gt; column in the dataset)?&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;    regress_test_savings &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;lm&lt;/span&gt;(Production &lt;span style=&#34;color:#f92672&#34;&gt;~&lt;/span&gt; forecast &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; Savings, data &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; backtest_results)
-    &lt;span style=&#34;color:#a6e22e&#34;&gt;summary&lt;/span&gt;(regress_test_savings)
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;regress_test_savings &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;lm&lt;/span&gt;(Production &lt;span style=&#34;color:#f92672&#34;&gt;~&lt;/span&gt; forecast &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; Savings, data &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; backtest_results)
+&lt;span style=&#34;color:#a6e22e&#34;&gt;summary&lt;/span&gt;(regress_test_savings)
 
-    &lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Call:&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## lm(formula = Production ~ forecast + Savings, data = backtest_results)&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Residuals:&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;##     Min      1Q  Median      3Q     Max &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## -3.1353 -0.5435  0.1223  0.6092  2.7229 &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Coefficients:&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;##             Estimate Std. Error t value Pr(&amp;gt;|t|)    &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## (Intercept) -0.34043    0.16657  -2.044   0.0466 *  &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## forecast     1.08637    0.14867   7.307  2.8e-09 ***&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Savings     -0.01165    0.01029  -1.132   0.2633    &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## ---&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Residual standard error: 1.059 on 47 degrees of freedom&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## Multiple R-squared:  0.5383, Adjusted R-squared:  0.5186 &lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## F-statistic: 27.39 on 2 and 47 DF,  p-value: 1.299e-08&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Call:&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## lm(formula = Production ~ forecast + Savings, data = backtest_results)&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Residuals:&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;##     Min      1Q  Median      3Q     Max &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## -3.1353 -0.5435  0.1223  0.6092  2.7229 &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Coefficients:&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;##             Estimate Std. Error t value Pr(&amp;gt;|t|)    &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## (Intercept) -0.34043    0.16657  -2.044   0.0466 *  &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## forecast     1.08637    0.14867   7.307  2.8e-09 ***&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Savings     -0.01165    0.01029  -1.132   0.2633    &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## ---&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Residual standard error: 1.059 on 47 degrees of freedom&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## Multiple R-squared:  0.5383, Adjusted R-squared:  0.5186 &lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## F-statistic: 27.39 on 2 and 47 DF,  p-value: 1.299e-08&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The p-value in this case is high, so we should not include savings in
 our model.&lt;/p&gt;
 &lt;p&gt;Let’s check our choice by including consumption in the ARIMA model and
 running a new backtest&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;    backtest_regressor_results &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_results
-    backtest_regressor_results&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;forecast_consumption &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rep&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;NA&lt;/span&gt;, backtest_size)
-    &lt;span style=&#34;color:#a6e22e&#34;&gt;for &lt;/span&gt;(backtest_num in backtest_size&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;) {
-        fit &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; us_change[1&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;(n &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; backtest_num),] &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-            &lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;(Quarter, Production, Consumption) &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-            &lt;span style=&#34;color:#a6e22e&#34;&gt;model&lt;/span&gt;(
-                forecast &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ARIMA&lt;/span&gt;(Production &lt;span style=&#34;color:#f92672&#34;&gt;~&lt;/span&gt; Consumption)
-            )
-        new_regressor &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;(us_change[n &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; (backtest_num &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;),], Quarter, Consumption)
-        backtest_fc &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; fit &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;forecast&lt;/span&gt;(new_data &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; new_regressor)
-        results_index &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_size &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; (backtest_num &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
-        backtest_regressor_results&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;forecast_consumption[results_index] &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_fc&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;.mean
-    }
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;backtest_regressor_results &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_results
+backtest_regressor_results&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;forecast_consumption &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rep&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;NA&lt;/span&gt;, backtest_size)
+&lt;span style=&#34;color:#a6e22e&#34;&gt;for &lt;/span&gt;(backtest_num in backtest_size&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;) {
+    fit &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; us_change[1&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;(n &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; backtest_num),] &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;(Quarter, Production, Consumption) &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;model&lt;/span&gt;(
+            forecast &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ARIMA&lt;/span&gt;(Production &lt;span style=&#34;color:#f92672&#34;&gt;~&lt;/span&gt; Consumption)
+        )
+    new_regressor &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;select&lt;/span&gt;(us_change[n &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; (backtest_num &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;),], Quarter, Consumption)
+    backtest_fc &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; fit &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;forecast&lt;/span&gt;(new_data &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; new_regressor)
+    results_index &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_size &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; (backtest_num &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
+    backtest_regressor_results&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;forecast_consumption[results_index] &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;-&lt;/span&gt; backtest_fc&lt;span style=&#34;color:#f92672&#34;&gt;$&lt;/span&gt;.mean
+}
 
-    &lt;span style=&#34;color:#75715e&#34;&gt;# Plot both backtests&lt;/span&gt;
-    backtest_regressor_results &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;pivot_longer&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt;(Production, forecast, forecast_consumption), names_to &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Type&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;autoplot&lt;/span&gt;(value)
+&lt;span style=&#34;color:#75715e&#34;&gt;# Plot both backtests&lt;/span&gt;
+backtest_regressor_results &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;pivot_longer&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt;(Production, forecast, forecast_consumption), names_to &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Type&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;autoplot&lt;/span&gt;(value)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;figure &gt;
     &lt;style scoped&gt;
@@ -367,17 +367,17 @@ running a new backtest&lt;/p&gt;
 
 &lt;p&gt;It’s a little difficult to tell which forecast performed better by eye,
 so let’s check the MSE error&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;    backtest_regressor_results &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;as_tibble&lt;/span&gt;() &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;summarise&lt;/span&gt;(
-            MSE_no_regressors &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;mean&lt;/span&gt;((Production &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; forecast)^2),
-            MSE_consumption_regressor &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;mean&lt;/span&gt;((Production &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; forecast_consumption)^2)
-        )
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;backtest_regressor_results &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;as_tibble&lt;/span&gt;() &lt;span style=&#34;color:#f92672&#34;&gt;%&amp;gt;%&lt;/span&gt;
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;summarise&lt;/span&gt;(
+        MSE_no_regressors &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;mean&lt;/span&gt;((Production &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; forecast)^2),
+        MSE_consumption_regressor &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;mean&lt;/span&gt;((Production &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; forecast_consumption)^2)
+    )
 
-    &lt;span style=&#34;color:#75715e&#34;&gt;## # A tibble: 1 x 2&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;##   MSE_no_regressors MSE_consumption_regressor&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;##               &amp;lt;dbl&amp;gt;                     &amp;lt;dbl&amp;gt;&lt;/span&gt;
-    &lt;span style=&#34;color:#75715e&#34;&gt;## 1              1.20                      1.01&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## # A tibble: 1 x 2&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;##   MSE_no_regressors MSE_consumption_regressor&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;##               &amp;lt;dbl&amp;gt;                     &amp;lt;dbl&amp;gt;&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;## 1              1.20                      1.01&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The MSE is lower in the backtest including consumption as a regressor,
 so we probably made the right choice :).&lt;/p&gt;
 &lt;h1 id=&#34;key-points&#34;&gt;

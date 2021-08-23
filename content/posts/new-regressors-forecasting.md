@@ -156,11 +156,11 @@ It can be accessed after loading in `fpp3`, and is called `us_change`.
 The column we want to forecast is `Production`. Let’s plot it
 
 ```r
-    library(fpp3)
+library(fpp3)
 
-    us_change %>%
-        autoplot(Production) +
-        labs(y = "Production (% change)")
+us_change %>%
+    autoplot(Production) +
+    labs(y = "Production (% change)")
 ```
 
 {{< image src="/post_images/feature-selection-forecasting/plot_actuals-1.png" alt="Plot of US % change production over time" caption="Plot of US % change production over time." >}}
@@ -176,28 +176,28 @@ forecast one-step ahead. The `ARIMA` function will automatically perform
 parameter tuning for the ARIMA model using AIC.
 
 ```r
-    # Set seed for reproducibility
-    set.seed(13)
-    backtest_size <- 50
-    n <- nrow(us_change)
-    backtest_results <- us_change[(n - (backtest_size - 1)):n,]
-    backtest_results$forecast <- rep(NA, backtest_size)
-    for (backtest_num in backtest_size:1) {
-        fit <- us_change[1:(n - backtest_num),] %>%
-            select(Production) %>%
-            model(
-                forecast = ARIMA(Production)
-            )
-        backtest_fc <- fit %>% forecast(h = 1)
-        results_index <- backtest_size - (backtest_num - 1)
-        backtest_results$forecast[results_index] <- backtest_fc$.mean
-    }
+# Set seed for reproducibility
+set.seed(13)
+backtest_size <- 50
+n <- nrow(us_change)
+backtest_results <- us_change[(n - (backtest_size - 1)):n,]
+backtest_results$forecast <- rep(NA, backtest_size)
+for (backtest_num in backtest_size:1) {
+    fit <- us_change[1:(n - backtest_num),] %>%
+        select(Production) %>%
+        model(
+            forecast = ARIMA(Production)
+        )
+    backtest_fc <- fit %>% forecast(h = 1)
+    results_index <- backtest_size - (backtest_num - 1)
+    backtest_results$forecast[results_index] <- backtest_fc$.mean
+}
 
-Let’s plot our backtest results against actuals
+# Let’s plot our backtest results against actuals
 
-    backtest_results %>%
-        pivot_longer(c(Production, forecast), names_to = "Type") %>%
-        autoplot(value)
+backtest_results %>%
+    pivot_longer(c(Production, forecast), names_to = "Type") %>%
+    autoplot(value)
 ```
 
 {{< image src="/post_images/feature-selection-forecasting/backtest_plot-1.png" alt="Plot of ARIMA backtest without regressors" caption="Plot of ARIMA backtest without regressors." >}}
@@ -217,28 +217,28 @@ Let’s use a simple linear regression to see if using consumption as a
 regressor has any promise.
 
 ```r
-    regress_test <- lm(Production ~ forecast + Consumption, data = backtest_results)
-    summary(regress_test)
+regress_test <- lm(Production ~ forecast + Consumption, data = backtest_results)
+summary(regress_test)
 
-    ## 
-    ## Call:
-    ## lm(formula = Production ~ forecast + Consumption, data = backtest_results)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -2.4347 -0.7459  0.1566  0.5379  2.4470 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)  -0.8588     0.1889  -4.545 3.84e-05 ***
-    ## forecast      0.8750     0.1406   6.224 1.23e-07 ***
-    ## Consumption   1.2630     0.3158   4.000 0.000223 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 0.9268 on 47 degrees of freedom
-    ## Multiple R-squared:  0.6461, Adjusted R-squared:  0.6311 
-    ## F-statistic: 42.91 on 2 and 47 DF,  p-value: 2.501e-11
+## 
+## Call:
+## lm(formula = Production ~ forecast + Consumption, data = backtest_results)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -2.4347 -0.7459  0.1566  0.5379  2.4470 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)  -0.8588     0.1889  -4.545 3.84e-05 ***
+## forecast      0.8750     0.1406   6.224 1.23e-07 ***
+## Consumption   1.2630     0.3158   4.000 0.000223 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.9268 on 47 degrees of freedom
+## Multiple R-squared:  0.6461, Adjusted R-squared:  0.6311 
+## F-statistic: 42.91 on 2 and 47 DF,  p-value: 2.501e-11
 ```
 
 The p-value is very low for the `Consumption` column, well below the
@@ -248,28 +248,28 @@ improve predictive performance.
 What about consumer savings (the `Savings` column in the dataset)?
 
 ```r
-    regress_test_savings <- lm(Production ~ forecast + Savings, data = backtest_results)
-    summary(regress_test_savings)
+regress_test_savings <- lm(Production ~ forecast + Savings, data = backtest_results)
+summary(regress_test_savings)
 
-    ## 
-    ## Call:
-    ## lm(formula = Production ~ forecast + Savings, data = backtest_results)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -3.1353 -0.5435  0.1223  0.6092  2.7229 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) -0.34043    0.16657  -2.044   0.0466 *  
-    ## forecast     1.08637    0.14867   7.307  2.8e-09 ***
-    ## Savings     -0.01165    0.01029  -1.132   0.2633    
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 1.059 on 47 degrees of freedom
-    ## Multiple R-squared:  0.5383, Adjusted R-squared:  0.5186 
-    ## F-statistic: 27.39 on 2 and 47 DF,  p-value: 1.299e-08
+## 
+## Call:
+## lm(formula = Production ~ forecast + Savings, data = backtest_results)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.1353 -0.5435  0.1223  0.6092  2.7229 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) -0.34043    0.16657  -2.044   0.0466 *  
+## forecast     1.08637    0.14867   7.307  2.8e-09 ***
+## Savings     -0.01165    0.01029  -1.132   0.2633    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.059 on 47 degrees of freedom
+## Multiple R-squared:  0.5383, Adjusted R-squared:  0.5186 
+## F-statistic: 27.39 on 2 and 47 DF,  p-value: 1.299e-08
 ```
 
 The p-value in this case is high, so we should not include savings in
@@ -279,24 +279,24 @@ Let’s check our choice by including consumption in the ARIMA model and
 running a new backtest
 
 ```r
-    backtest_regressor_results <- backtest_results
-    backtest_regressor_results$forecast_consumption <- rep(NA, backtest_size)
-    for (backtest_num in backtest_size:1) {
-        fit <- us_change[1:(n - backtest_num),] %>%
-            select(Quarter, Production, Consumption) %>%
-            model(
-                forecast = ARIMA(Production ~ Consumption)
-            )
-        new_regressor <- select(us_change[n - (backtest_num - 1),], Quarter, Consumption)
-        backtest_fc <- fit %>% forecast(new_data = new_regressor)
-        results_index <- backtest_size - (backtest_num - 1)
-        backtest_regressor_results$forecast_consumption[results_index] <- backtest_fc$.mean
-    }
+backtest_regressor_results <- backtest_results
+backtest_regressor_results$forecast_consumption <- rep(NA, backtest_size)
+for (backtest_num in backtest_size:1) {
+    fit <- us_change[1:(n - backtest_num),] %>%
+        select(Quarter, Production, Consumption) %>%
+        model(
+            forecast = ARIMA(Production ~ Consumption)
+        )
+    new_regressor <- select(us_change[n - (backtest_num - 1),], Quarter, Consumption)
+    backtest_fc <- fit %>% forecast(new_data = new_regressor)
+    results_index <- backtest_size - (backtest_num - 1)
+    backtest_regressor_results$forecast_consumption[results_index] <- backtest_fc$.mean
+}
 
-    # Plot both backtests
-    backtest_regressor_results %>%
-        pivot_longer(c(Production, forecast, forecast_consumption), names_to = "Type") %>%
-        autoplot(value)
+# Plot both backtests
+backtest_regressor_results %>%
+    pivot_longer(c(Production, forecast, forecast_consumption), names_to = "Type") %>%
+    autoplot(value)
 ```
 
 {{< image src="/post_images/feature-selection-forecasting/regress_backtest-1.png" alt="Plot of ARIMA backtest with and without selected regressors" caption="Plot of ARIMA backtest with and without selected regressors." >}}
@@ -305,17 +305,17 @@ It’s a little difficult to tell which forecast performed better by eye,
 so let’s check the MSE error
 
 ```r
-    backtest_regressor_results %>%
-        as_tibble() %>%
-        summarise(
-            MSE_no_regressors = mean((Production - forecast)^2),
-            MSE_consumption_regressor = mean((Production - forecast_consumption)^2)
-        )
+backtest_regressor_results %>%
+    as_tibble() %>%
+    summarise(
+        MSE_no_regressors = mean((Production - forecast)^2),
+        MSE_consumption_regressor = mean((Production - forecast_consumption)^2)
+    )
 
-    ## # A tibble: 1 x 2
-    ##   MSE_no_regressors MSE_consumption_regressor
-    ##               <dbl>                     <dbl>
-    ## 1              1.20                      1.01
+## # A tibble: 1 x 2
+##   MSE_no_regressors MSE_consumption_regressor
+##               <dbl>                     <dbl>
+## 1              1.20                      1.01
 ```
 
 The MSE is lower in the backtest including consumption as a regressor,
