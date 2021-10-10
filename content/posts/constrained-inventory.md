@@ -47,6 +47,69 @@ In reality, the question often morphs into, what is the most valuable stock to b
 
 In this article I'll focus on a way to solve this problem. For now I'll focus on what to bring into one warehouse with multiple items, random demand, and a constraint on how much can be bought in (e.g. the number of trucks available to move the product). 
 
-This problem is not too bad to solve on its own, but typically supply networks will see seasonal demand (see point 4 above). This means we don't just need to think about today, we need to look ahead to see if stock desperately needs to be brought in for the busiest day. This adds a lot of complexity, and the solution took a lot of thought; but I cover this case after the single day case.
+This problem is not too bad to solve on its own, but typically supply networks will see seasonal demand (see point 4 above). This means we don't just need to think about today, we need to look ahead to see if stock desperately needs to be brought in for the busiest day. This adds a lot of complexity, and the solution took a lot of thought; but I cover a heuristic for this case after the single day case.
 
 The solution can easily be extended to multiple warehouses competing for stock, using the same logic. I'll leave this to a future post.
+
+It should also be extendable to the case where the warehouse capacity itself is the constraint.
+
+
+# Single period problem
+
+We'll start with the single period problem (e.g. solving the problem for just one day), where we can derive an optimal solution in terms of expected profit. This sets up the notation for the multi-period problem.
+
+## Setup
+
+Assume we have \\(i= 1,...,I\\) SKUs. At the end of the period a random number \\(Y_i\\) of each item is demanded. Let's assume we have a reasonable handle on \\(\mathbb P(Y_i \geq y)\\), i.e. the demand probabilities. This can be achieved through a probabilistic forecast.
+
+We assume starting inventory \\(x_i\\) for each item is known. The amount of inventory of item \\(i\\) we choose to bring in we label \\(a_i\\).
+
+With this in place, we can label the remaining variables, and define the problem:
+
+* \\(r_i\\) -- the revenue gained if one unit of item \\(i\\) is demanded.
+* \\(C_i\\) -- the cost of bringing one further unit of item \\(i\\) into the warehouse. This could be due to e.g. transport or purchase costs.
+* \\(K\\) -- maximum number of items that can be brought into the warehouse: i.e., we required \\(\sum_{i=1}^I a_i \leq K\\). This could be due to movement capacity constraints (e.g. number of trucks). There might be an explicit warehouse capacity constraint, which could be easily added to the single period problem, but requires more work for the multiple period problem.
+
+We can define the problem as bringing in \\(a_i\\) in order to maximize profit, defined as
+\\[
+    \sum_{i=1}^I \left(r_i Y_i - a_i C_i \right),
+\\] 
+while staying below the movement constraint \\(\sum_{i=1}^I a_i \leq K\\).
+
+Bring in too much stock, and we are paying unnecessary cost \\(C_i\\). But not enough stock will lead to unmet demand, and lost sales. Sometimes a penalty for missed sales gets added to this problem, to indicate impact to customer loyalty. This can easily be done in this formulation.
+
+
+We can solve the single period problem to maximise expected reward using a simple iterative algorithm. First define \\(\hat a_i\\) to be the amount of item \\(i\\) scheduled to be moved so far by the algorithm, and initialise by setting equal to 0, \\(a_i = 0\\).
+
+
+We can calculate the marginal reward of loading an extra unit of item \\(i\\) exactly as
+\\[
+    r_i \mathbb P(Y_i > x_i + \hat a_i) - C_i.
+\\]
+The first term is the revenue multiplied by the probability that additional unit would be ordered. The second term is the cost of loading that item.
+
+This marginal reward immediately gives rise to an iterative algorithm:
+
+
+### Single period algorithm
+
+1. Initialise \\(a_i = 0\\)
+2. Until STOP do
+
+    i. 
+        \\[
+            i_{best} = \text{argmax}_i \left[ r_i \mathbb P(Y_i > x_i + \hat a_i) - C_i \right]
+        \\]
+    ii. 
+        If for \\(i_{best}\\) \\(r_i P(Y_i > x_i + \hat a_i) - C_i < 0\\), or \\(\sum_{i=1}^I \hat a_i \geq K\\): STOP
+
+    iii. 
+        Load item \\(i_{best}\\): set \\(\hat a_{i_{best}} = \hat a_{i_{best}} + 1\\)
+
+
+# Multi-period problem
+
+This problem is more complex but if we want to handle seasonality it's essential. Now we add in time \\(t = 1, ..., T\\). We set \\(T\\), the horizon, to be the seasonal period (e.g. 7 if we're looking at daily data). This ensures the busiest days are taken into account when loading.
+
+
+We assume at the start of each period \\(t\\), we have inventory for item \\(i\\) of \\(x_{ti}\\). We assume \\(x_{1i}\\) is known, but for all later periods it depends on the demand and loading choice. So is unknown.

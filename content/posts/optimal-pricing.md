@@ -52,3 +52,6 @@ For simplicity though, we will continue with this simple model of elasticity; ad
 
 
 # Bayesian Linear Bandits
+
+
+For our pricing procedure, we essentially need to 
