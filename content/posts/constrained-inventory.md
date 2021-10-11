@@ -113,3 +113,31 @@ This problem is more complex but if we want to handle seasonality it's essential
 
 
 We assume at the start of each period \\(t\\), we have inventory for item \\(i\\) of \\(x_{ti}\\). We assume \\(x_{1i}\\) is known, but for all later periods it depends on the demand and loading choice. So is unknown.
+
+We assume a loading amount \\(a_{ti}\\) is chosen for the period, and after that a random amount \\(Y_{ti}\\) is demanded. This is fulfilled from the inventory \\(x_{ti} + a_{ti}\\), with reward \\(r_i\\) for each unit of item \\(i\\) successfully fulfilled, but any demand over the inventory is lost sales.
+
+The rest of the problem setup is as follows
+
+* \\(C_i\\) -- cost of loading one unit of item \\(i\\)
+* \\(K\\) -- capacity of items that brought into the warehouse in any period, i.e. for all \\(t\\), \\(\sum_{i=1}^I a_{ti} \leq K\\)
+
+
+## Possible heuristic procedure
+
+Because starting inventory \\(x_{1i}\\) is known, we can solve the problem exactly using dynamic programming. We would do this by proceeding backwards from the last horizon, which we solve using a single period problem. Then each of the possible cases for \\(T-1\\) (depending on inventory levels at that point) can be solved using a single period problem, and the value function for the expected remaining inventory at \\(T\\), etc.
+
+The big problem with this approach is we have to consider all possible inventory levels for each item, which will quickly explode as the number of items increases.
+
+We attempt to get around this by noticing that we are only interested in \\(a_{1i}\\) at each period, i.e. the loading we have to do today. To do this we have to consider the future states in case there's a particularly busy day. But we suggest instead of having it as a state, we replace it with its expected value, determined by \\(x_{ti}\\), \\(\hat a_{ti}\\) and \\(\mathbb E(Y_{ti})\\).
+
+We can initialise the problem using a greedy algorithm. Set \\(\hat a_{1i}\\) by solving the single period problem for period 1. Now initialise the inventory for period 2 using expected values
+\\[
+    x_{2i} = \max\left[x_{1i} + \hat a_{1i} - \mathbb E(Y_{1i}), 0 \right].
+\\]
+
+We can proceed initialisation iteratively using a similar procedure: solving a single period problem for horizon \\(t\\), then initialising the inventory as
+\\[
+    x_{t+1,i} = \max\left[x_{1i} + \sum_{s=1}^t \left(\hat a_{si} - \mathbb E(Y_{si})\right), 0 \right].
+\\]
+
+Now we've intialised the problem, we can proceed to the heuristic algorithm. For this, the inventory \\(x_{ti}\\) and loading amounts \\(\hat a_{ti}\\), need to be constantly updated as things are changed by the algorithm.
