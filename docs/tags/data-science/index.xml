@@ -208,6 +208,13 @@ Breaking this down: the additional unit of product \(i\) will either be ordered 
   &lt;/a&gt;
 &lt;/h2&gt;
 &lt;p&gt;The intuition for this heuristic is that the uncertainty in demand has two effects: the uncertainty for that period; the uncertainty of how much inventory will be available in later periods. This heuristic captures how demand affects the uncertainty in each period, but ignores knock-on uncertainty effects on the inventory levels &amp;ndash; replacing it with a deterministic expected value. This should work because we are mainly interested in the first period, so not capturing the inventory uncertainty would hopefully not have a massive effect.&lt;/p&gt;
+&lt;h2 id=&#34;acknowledgments&#34;&gt;
+  Acknowledgments
+  &lt;a class=&#34;heading-link&#34; href=&#34;#acknowledgments&#34;&gt;
+    &lt;i class=&#34;fa fa-link&#34; aria-hidden=&#34;true&#34;&gt;&lt;/i&gt;
+  &lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Thanks to Jake Clarkson for reviewing this algorithm and providing helpful comments.&lt;/p&gt;
 </description>
     </item>
     
