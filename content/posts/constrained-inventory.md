@@ -192,3 +192,7 @@ This procedure can be repeated to time period $t=1$, which will be our required 
 ## Intuition
 
 The intuition for this heuristic is that the uncertainty in demand has two effects: the uncertainty for that period; the uncertainty of how much inventory will be available in later periods. This heuristic captures how demand affects the uncertainty in each period, but ignores knock-on uncertainty effects on the inventory levels -- replacing it with a deterministic expected value. This should work because we are mainly interested in the first period, so not capturing the inventory uncertainty would hopefully not have a massive effect.
+
+## Acknowledgments
+
+Thanks to Jake Clarkson for reviewing this algorithm and providing helpful comments.
