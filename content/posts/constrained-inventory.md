@@ -128,16 +128,64 @@ Because starting inventory \\(x_{1i}\\) is known, we can solve the problem exact
 
 The big problem with this approach is we have to consider all possible inventory levels for each item, which will quickly explode as the number of items increases.
 
-We attempt to get around this by noticing that we are only interested in \\(a_{1i}\\) at each period, i.e. the loading we have to do today. To do this we have to consider the future states in case there's a particularly busy day. But we suggest instead of having it as a state, we replace it with its expected value, determined by \\(x_{ti}\\), \\(\hat a_{ti}\\) and \\(\mathbb E(Y_{ti})\\).
+We attempt to get around this by noticing that we are only interested in \\(a_{1i}\\) at each period, i.e. the loading we have to do today. To do this we have to consider the future states in case there's a particularly busy day. But we suggest instead of having it as a state, we replace it with its expected value, determined by \\(x_{ti}\\), \\(\hat a_{ti}\\) and \\(\mathbb E(Y_{ti})\\). Once again we defined \\(\hat a_{ti}\\) to be the loadings chosen by the algorithm so far.
 
 We can initialise the problem using a greedy algorithm. Set \\(\hat a_{1i}\\) by solving the single period problem for period 1. Now initialise the inventory for period 2 using expected values
 \\[
     x_{2i} = \max\left[x_{1i} + \hat a_{1i} - \mathbb E(Y_{1i}), 0 \right].
 \\]
 
-We can proceed initialisation iteratively using a similar procedure: solving a single period problem for horizon \\(t\\), then initialising the inventory as
+We can proceed initialisation iteratively using a similar procedure: solving a single period problem for horizon \\(t\\) to get an initial \\(\hat a_{ti}\\), then initialising the inventory as
 \\[
     x_{t+1,i} = \max\left[x_{1i} + \sum_{s=1}^t \left(\hat a_{si} - \mathbb E(Y_{si})\right), 0 \right].
 \\]
 
 Now we've intialised the problem, we can proceed to the heuristic algorithm. For this, the inventory \\(x_{ti}\\) and loading amounts \\(\hat a_{ti}\\), need to be constantly updated as things are changed by the algorithm.
+
+Similar to dynamic programming, we proceed backwards, but now with our fixed inventory states. For period \\(t=T\\), we are at the end of the horizon, so have no horizons ahead to consider. So it's safe to assume that the single period problem will be a good result. Therefore we do nothing for this period, and move back to the next period.
+
+At period \\(t=T-1\\), we need to look at both the current period, and the period \\(t=T\\). First set \\(b_{t,i} = x_{ti} + \hat a_{ti}\\). Applying our inventory assumption, similar to the single period problem, we can write down the marginal reward of adding another unit of item \\(i\\) to the loading in period \\(T-1\\):
+\\[
+    N_{T-1,i} = \mathbb P(Y_{T-1,i} > b_{T-1, i}) R_i - C_i +
+    \mathbb P(Y_{T-1,i} \leq b_{T-1, i}) \mathbb P(Y_{T,i} > b_{T,i}) R_i.
+\\]
+We can break down the parts of the marginal reward as follows: the additional unit of product $i$ will either be ordered at time $T-1$, not ordered at time $T-1$ but ordered at time $T$; or not ordered at all because we've reached the end of the horizon.
+
+Because we've initialised this problem with the single period algorithm though, our loadings might be full. In this case we can't just add the item with the best marginal reward, we need to swap it with an item in the loading.
+
+To do this we can check the marginal cost of removing one unit of one item from the knapsack. This is equivalant to the marginal reward  above replacing \\(b_{T-1, i}\\) with \\(b_{T-1, i} - 1\\); i.e.
+\\[
+    M_{T-1,i} = \mathbb P(Y_{T-1,i} > b_{T-1, i} - 1) R_i - C_i +
+    \mathbb P(Y_{T-1,i} \leq b_{T-1, i} - 1) \mathbb P(Y_{T,i} > b_{T,i} - 1) R_i.
+\\]
+
+A single step of the algorithm then proceeds as follows:
+
+1. Check if \\(N^* = \max_{i} N_{T-1,i}\\) is positive. If it's \\(\leq 0\\), STOP.
+
+2. Set \\(i_{best} = \text{argmax}_{i} N_{T-1,i}\\). Set \\(M_* = \min M_{T-1, i}\\), and \\(j_{worst} = \text{argmin}_{i} M_{T-1,i}\\).
+
+3. If the capacity \\(K\\) is not reached (i.e. \\(\sum_{i=1}^I a_{T-1,i} < K\\)), then add \\(i_{best}\\) to the loading. Set \\(a_{T-1,i_{best}} = a_{T-1, i_{best}} + 1\\).
+
+4. If the capacity \\(K\\) is reached, then check if \\(N^* > M_*\\). If it isn't STOP. Otherwise load \\(i_{best}\\) and unload \\(j_{worst}\\); i.e. set \\(\hat a_{T-1, i_{best}} = \hat a_{T-1, i_{best}} + 1\\) and \\(\hat a_{T-1, j_{worst}} = \hat a_{T-1, j_{worst}} - 1\\)
+
+
+After each iteration of this algorithm, if \\(N^* \leq 0\\), or \\(N^* \leq M_*\\), we stop completely and move to the next period.
+
+Otherwise we update the inventory values \\(x_{t,i_{best}}\\) and \\(x_{t, j_{worst}}\\) for \\(t = T-1, T\\) using the new loadings \\(\hat a_{T-1, i_{best}}\\) and \\(\hat a_{T-1, j_{worst}}\\). Also update \\(N_{T-1, i_{best}}\\), \\(N_{T-1, j_{worst}}\\), \\(M_{T-1, i_{best}}\\) and \\(M_{T-1, i_{worst}}\\) given the updated loadings and inventory values. Then we repeat the algorithm above, until either \\(N^* \leq 0\\), or \\(N^* \leq M_*\\).
+
+
+Moving to time period $t = T-2$ we can follow the exact logic as for $t = T-1$. The difference here will be our marginal rewards. We have
+\\[
+    N_{T-2,i} = \mathbb P(Y_{T-2,i} > b_{T-2, i}) R_i - C_i 
+    + \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} > b_{T-1,i}) R_i
+    + \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} \leq b_{T-1, i}) \mathbb P(Y_{T,i} > b_{T,i}) R_i.
+\\]
+Breaking this down: the additional unit of product \\(i\\) will either be ordered at time \\(T-2\\), not ordered at time \\(T-2\\) but ordered at time \\(T-1\\), not ordered at time \\(T-2, T-1\\) but ordered at time \\(T\\); or not ordered at all because we've reached the end of the horizon. Similar logic can be used to calculate \\(M_{T-2, i}\\).
+
+This procedure can be repeated to time period $t=1$, which will be our required loading for today.
+
+
+## Intuition
+
+The intuition for this heuristic is that the uncertainty in demand has two effects: the uncertainty for that period; the uncertainty of how much inventory will be available in later periods. This heuristic captures how demand affects the uncertainty in each period, but ignores knock-on uncertainty effects on the inventory levels -- replacing it with a deterministic expected value. This should work because we are mainly interested in the first period, so not capturing the inventory uncertainty would hopefully not have a massive effect.
