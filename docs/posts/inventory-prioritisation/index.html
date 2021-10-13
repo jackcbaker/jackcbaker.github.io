@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="color-scheme" content="light dark">
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+
+    
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; block-all-mixed-content; default-src 'self'; child-src 'self'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net/; form-action 'self'; frame-src 'self'; img-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/ https://cdn.jsdelivr.net/; script-src 'self' 'unsafe-inline' https://www.google-analytics.com; prefetch-src 'self';">
+    
+
+    <meta name="author" content="Jack Baker">
+    <meta name="description" content="Most inventory optimisation methods tell you how much stock to bring in at the network level. But often at lower granularities there is not enough space, or enough trucks to move it all. In this case you need to prioritise what to bring in, this article explains how.">
+    <meta name="keywords" content="blog,data science">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="A heuristic for prioritising demand planning at lower granularities"/>
+<meta name="twitter:description" content="Most inventory optimisation methods tell you how much stock to bring in at the network level. But often at lower granularities there is not enough space, or enough trucks to move it all. In this case you need to prioritise what to bring in, this article explains how."/>
+
+    <meta property="og:title" content="A heuristic for prioritising demand planning at lower granularities" />
+<meta property="og:description" content="Most inventory optimisation methods tell you how much stock to bring in at the network level. But often at lower granularities there is not enough space, or enough trucks to move it all. In this case you need to prioritise what to bring in, this article explains how." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://jackbakerds.com/posts/inventory-prioritisation/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-09-18T18:18:31&#43;01:00" />
+<meta property="article:modified_time" content="2021-09-18T18:18:31&#43;01:00" />
+
+
+
+    <title>
+  A heuristic for prioritising demand planning at lower granularities · Jack Baker
+</title>
+
+    
+      <link rel="canonical" href="https://jackbakerds.com/posts/inventory-prioritisation/">
+    
+
+    <link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.1.7" as="font" type="font/woff2" crossorigin>
+
+    
+      
+      
+      <link rel="stylesheet" href="/css/coder.min.eb7743f94930acfd17146aecc1f80e86fe35b3e451f2ec0c98485f9c4d962f34.css" integrity="sha256-63dD&#43;UkwrP0XFGrswfgOhv41s&#43;RR8uwMmEhfnE2WLzQ=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+      
+        
+        
+        <link rel="stylesheet" href="/css/coder-dark.min.dde8a61eb31a32353b4baf3d9113f03c4ea2a8ca9bb736f59ca2d2b2cb664f0b.css" integrity="sha256-3eimHrMaMjU7S689kRPwPE6iqMqbtzb1nKLSsstmTws=" crossorigin="anonymous" media="screen" />
+      
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+    
+
+    <meta name="generator" content="Hugo 0.82.0" />
+  </head>
+
+  
+  
+    
+  
+  <body class="preload-transitions colorscheme-auto"
+        onload=""
+  >
+    
+<div class="float-container">
+    <a id="dark-mode-toggle" class="colorscheme-toggle">
+        <i class="fa fa-adjust fa-fw" aria-hidden="true"></i>
+    </a>
+</div>
+
+
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Jack Baker
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="https://jackbakerds.com/posts/inventory-prioritisation/">
+              A heuristic for prioritising demand planning at lower granularities
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime='2021-09-18T18:18:31&#43;01:00'>
+                September 18, 2021
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              12-minute read
+            </span>
+          </div>
+          <div class="authors">
+    <i class="fa fa-user" aria-hidden="true"></i>
+      <a href="/authors/jack-baker/">Jack Baker</a></div> 
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <a href="/tags/data-science/">data science</a>
+      <span class="separator">•</span>
+    <a href="/tags/machine-learning/">machine learning</a>
+      <span class="separator">•</span>
+    <a href="/tags/optimisation/">optimisation</a></div>
+
+          <a href=https://twitter.com/jackbakerds target="_blank">
+    <i class="bi bi-twitter"></i> Follow me on Twitter
+</a>
+        </div>
+      </header>
+
+      <div>
+        
+        <p>Most inventory optimisation methods tell you how much stock to bring in at the network level. But often at lower granularities there is not enough space, or enough trucks to move it all. In this case you need to prioritise what to bring in. This article develops a heuristic to do this.</p>
+<h1 id="why-supply-chain-networks-are-often-strained">
+  Why supply chain networks are often strained?
+  <a class="heading-link" href="#why-supply-chain-networks-are-often-strained">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h1>
+<p>Most demand planning is performed at the highest level of granularity (e.g. how much will be demanded in the UK over the next week). This reduces the volatility of demand and so means less unnecessary stock is produced or bought. But this is only part of the supply chain. A big part is then distributing the stock around the supply network to ensure it is as close to the customer as possible.</p>
+<p>Since there is only enough stock at the highest granularity, this causes a strain on the network because:</p>
+<h3 id="1-the-demand-at-lower-granularities-will-be-more-volatile">
+  1. The demand at lower granularities will be more volatile
+  <a class="heading-link" href="#1-the-demand-at-lower-granularities-will-be-more-volatile">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>To fill each warehouse with enough stock to account for these volatilities would be more stock than is available in the network, since demand planning performed at the highest level of granularity.</p>
+<h3 id="2-warehouse-capacities">
+  2. Warehouse capacities
+  <a class="heading-link" href="#2-warehouse-capacities">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>Often individual warehouse capacities are tight: for example they might be full of a product that hasn&rsquo;t had as much demand as expected etc.</p>
+<h3 id="3-capacity-for-moving-stock">
+  3. Capacity for moving stock
+  <a class="heading-link" href="#3-capacity-for-moving-stock">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>The capacity to move stock around the network is limited (e.g. the number of trucks available). Because the network is strained stock might be put in the wrong warehouse and then has to be moved. But this is a waste that is bad for profitability and the environment, so should be minimised if possible.</p>
+<h3 id="4-seasonality">
+  4. Seasonality
+  <a class="heading-link" href="#4-seasonality">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<p>Warehouses will tend to have highly busy days followed by quieter days. Often the capacity for moving stock will be enough for a day of &lsquo;average demand&rsquo;. This adds a big problem: when should I start bringing in stock for my busiest day? Because if you don&rsquo;t, you&rsquo;ll miss a lot of sales as you didn&rsquo;t bring enough stock in on time.</p>
+<h1 id="why-traditional-inventory-optimisation-methods-dont-work-at-the-network-level">
+  Why traditional inventory optimisation methods don&rsquo;t work at the network level?
+  <a class="heading-link" href="#why-traditional-inventory-optimisation-methods-dont-work-at-the-network-level">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h1>
+<p>The classic inventory optimisation methods such as the <em>reorder point</em> method, and the <em>(s, S)</em> method answer the question:</p>
+<h4 id="given-my-uncertain-demand-how-much-inventory-should-i-bring-into-my-warehouse-to-make-sure-im-unlikely-to-miss-a-sale">
+  &lsquo;Given my (uncertain) demand how much inventory should I bring into my warehouse to make sure I&rsquo;m unlikely to miss a sale?&rsquo;
+  <a class="heading-link" href="#given-my-uncertain-demand-how-much-inventory-should-i-bring-into-my-warehouse-to-make-sure-im-unlikely-to-miss-a-sale">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h4>
+<p>But at the network level, this is probably the wrong question to ask. Because your network is strained, you&rsquo;re unlikely to be able to bring in the stock these methods recommend at the warehouse level. The methods also focus on one item at a time, but at the network level, bringing in one item may mean you can&rsquo;t bring in enough of another. This means you need to consider all items at the same time.</p>
+<p>In reality, the question often morphs into, what is the most valuable stock to bring into the warehouse today? This is the question I&rsquo;ll be solving in this article.</p>
+<h1 id="what-is-the-most-valuable-stock-to-bring-into-the-warehouse-today">
+  What is the most valuable stock to bring into the warehouse today?
+  <a class="heading-link" href="#what-is-the-most-valuable-stock-to-bring-into-the-warehouse-today">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h1>
+<p>In this article I&rsquo;ll focus on a way to solve this problem. For now I&rsquo;ll focus on what to bring into one warehouse with multiple items, random demand, and a constraint on how much can be bought in (e.g. the number of trucks available to move the product).</p>
+<p>This problem is not too bad to solve on its own, but typically supply networks will see seasonal demand (see point 4 above). This means we don&rsquo;t just need to think about today, we need to look ahead to see if stock desperately needs to be brought in for the busiest day. This adds a lot of complexity, and the solution took a lot of thought; but I cover a heuristic for this case after the single day case.</p>
+<p>The solution can easily be extended to multiple warehouses competing for stock, using the same logic. I&rsquo;ll leave this to a future post.</p>
+<p>It should also be extendable to the case where the warehouse capacity itself is the constraint.</p>
+<h1 id="single-period-problem">
+  Single period problem
+  <a class="heading-link" href="#single-period-problem">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h1>
+<p>We&rsquo;ll start with the single period problem (e.g. solving the problem for just one day), where we can derive an optimal solution in terms of expected profit. This sets up the notation for the multi-period problem.</p>
+<h2 id="setup">
+  Setup
+  <a class="heading-link" href="#setup">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>Assume we have \(i= 1,&hellip;,I\) SKUs. At the end of the period a random number \(Y_i\) of each item is demanded. Let&rsquo;s assume we have a reasonable handle on \(\mathbb P(Y_i \geq y)\), i.e. the demand probabilities. This can be achieved through a probabilistic forecast.</p>
+<p>We assume starting inventory \(x_i\) for each item is known. The amount of inventory of item \(i\) we choose to bring in we label \(a_i\).</p>
+<p>With this in place, we can label the remaining variables, and define the problem:</p>
+<ul>
+<li>\(r_i\) &ndash; the revenue gained if one unit of item \(i\) is demanded.</li>
+<li>\(C_i\) &ndash; the cost of bringing one further unit of item \(i\) into the warehouse. This could be due to e.g. transport or purchase costs.</li>
+<li>\(K\) &ndash; maximum number of items that can be brought into the warehouse: i.e., we required \(\sum_{i=1}^I a_i \leq K\). This could be due to movement capacity constraints (e.g. number of trucks). There might be an explicit warehouse capacity constraint, which could be easily added to the single period problem, but requires more work for the multiple period problem.</li>
+</ul>
+<p>We can define the problem as bringing in \(a_i\) in order to maximize profit, defined as
+\[
+\sum_{i=1}^I \left(r_i Y_i - a_i C_i \right),
+\]
+while staying below the movement constraint \(\sum_{i=1}^I a_i \leq K\).</p>
+<p>Bring in too much stock, and we are paying unnecessary cost \(C_i\). But not enough stock will lead to unmet demand, and lost sales. Sometimes a penalty for missed sales gets added to this problem, to indicate impact to customer loyalty. This can easily be done in this formulation.</p>
+<p>We can solve the single period problem to maximise expected reward using a simple iterative algorithm. First define \(\hat a_i\) to be the amount of item \(i\) scheduled to be moved so far by the algorithm, and initialise by setting equal to 0, \(a_i = 0\).</p>
+<p>We can calculate the marginal reward of loading an extra unit of item \(i\) exactly as
+\[
+r_i \mathbb P(Y_i &gt; x_i + \hat a_i) - C_i.
+\]
+The first term is the revenue multiplied by the probability that additional unit would be ordered. The second term is the cost of loading that item.</p>
+<p>This marginal reward immediately gives rise to an iterative algorithm:</p>
+<h3 id="single-period-algorithm">
+  Single period algorithm
+  <a class="heading-link" href="#single-period-algorithm">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h3>
+<ol>
+<li>
+<p>Initialise \(a_i = 0\)</p>
+</li>
+<li>
+<p>Until STOP do</p>
+<p>i.
+\[
+i_{best} = \text{argmax}_i \left[ r_i \mathbb P(Y_i &gt; x_i + \hat a_i) - C_i \right]
+\]
+ii.
+If for \(i_{best}\) \(r_i P(Y_i &gt; x_i + \hat a_i) - C_i &lt; 0\), or \(\sum_{i=1}^I \hat a_i \geq K\): STOP</p>
+<p>iii.
+Load item \(i_{best}\): set \(\hat a_{i_{best}} = \hat a_{i_{best}} + 1\)</p>
+</li>
+</ol>
+<h1 id="multi-period-problem">
+  Multi-period problem
+  <a class="heading-link" href="#multi-period-problem">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h1>
+<p>This problem is more complex but if we want to handle seasonality it&rsquo;s essential. Now we add in time \(t = 1, &hellip;, T\). We set \(T\), the horizon, to be the seasonal period (e.g. 7 if we&rsquo;re looking at daily data). This ensures the busiest days are taken into account when loading.</p>
+<p>We assume at the start of each period \(t\), we have inventory for item \(i\) of \(x_{ti}\). We assume \(x_{1i}\) is known, but for all later periods it depends on the demand and loading choice. So is unknown.</p>
+<p>We assume a loading amount \(a_{ti}\) is chosen for the period, and after that a random amount \(Y_{ti}\) is demanded. This is fulfilled from the inventory \(x_{ti} + a_{ti}\), with reward \(r_i\) for each unit of item \(i\) successfully fulfilled, but any demand over the inventory is lost sales.</p>
+<p>The rest of the problem setup is as follows</p>
+<ul>
+<li>\(C_i\) &ndash; cost of loading one unit of item \(i\)</li>
+<li>\(K\) &ndash; capacity of items that brought into the warehouse in any period, i.e. for all \(t\), \(\sum_{i=1}^I a_{ti} \leq K\)</li>
+</ul>
+<h2 id="possible-heuristic-procedure">
+  Possible heuristic procedure
+  <a class="heading-link" href="#possible-heuristic-procedure">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>Because starting inventory \(x_{1i}\) is known, we can solve the problem exactly using dynamic programming. We would do this by proceeding backwards from the last horizon, which we solve using a single period problem. Then each of the possible cases for \(T-1\) (depending on inventory levels at that point) can be solved using a single period problem, and the value function for the expected remaining inventory at \(T\), etc.</p>
+<p>The big problem with this approach is we have to consider all possible inventory levels for each item, which will quickly explode as the number of items increases.</p>
+<p>We attempt to get around this by noticing that we are only interested in \(a_{1i}\) at each period, i.e. the loading we have to do today. To do this we have to consider the future states in case there&rsquo;s a particularly busy day. But we suggest instead of having it as a state, we replace it with its expected value, determined by \(x_{ti}\), \(\hat a_{ti}\) and \(\mathbb E(Y_{ti})\). Once again we defined \(\hat a_{ti}\) to be the loadings chosen by the algorithm so far.</p>
+<p>We can initialise the problem using a greedy algorithm. Set \(\hat a_{1i}\) by solving the single period problem for period 1. Now initialise the inventory for period 2 using expected values
+\[
+x_{2i} = \max\left[x_{1i} + \hat a_{1i} - \mathbb E(Y_{1i}), 0 \right].
+\]</p>
+<p>We can proceed initialisation iteratively using a similar procedure: solving a single period problem for horizon \(t\) to get an initial \(\hat a_{ti}\), then initialising the inventory as
+\[
+x_{t+1,i} = \max\left[x_{1i} + \sum_{s=1}^t \left(\hat a_{si} - \mathbb E(Y_{si})\right), 0 \right].
+\]</p>
+<p>Now we&rsquo;ve intialised the problem, we can proceed to the heuristic algorithm. For this, the inventory \(x_{ti}\) and loading amounts \(\hat a_{ti}\), need to be constantly updated as things are changed by the algorithm.</p>
+<p>Similar to dynamic programming, we proceed backwards, but now with our fixed inventory states. For period \(t=T\), we are at the end of the horizon, so have no horizons ahead to consider. So it&rsquo;s safe to assume that the single period problem will be a good result. Therefore we do nothing for this period, and move back to the next period.</p>
+<p>At period \(t=T-1\), we need to look at both the current period, and the period \(t=T\). First set \(b_{t,i} = x_{ti} + \hat a_{ti}\). Applying our inventory assumption, similar to the single period problem, we can write down the marginal reward of adding another unit of item \(i\) to the loading in period \(T-1\):
+\[
+N_{T-1,i} = \mathbb P(Y_{T-1,i} &gt; b_{T-1, i}) R_i - C_i +
+\mathbb P(Y_{T-1,i} \leq b_{T-1, i}) \mathbb P(Y_{T,i} &gt; b_{T,i}) R_i.
+\]
+We can break down the parts of the marginal reward as follows: the additional unit of product $i$ will either be ordered at time $T-1$, not ordered at time $T-1$ but ordered at time $T$; or not ordered at all because we&rsquo;ve reached the end of the horizon.</p>
+<p>Because we&rsquo;ve initialised this problem with the single period algorithm though, our loadings might be full. In this case we can&rsquo;t just add the item with the best marginal reward, we need to swap it with an item in the loading.</p>
+<p>To do this we can check the marginal cost of removing one unit of one item from the knapsack. This is equivalant to the marginal reward  above replacing \(b_{T-1, i}\) with \(b_{T-1, i} - 1\); i.e.
+\[
+M_{T-1,i} = \mathbb P(Y_{T-1,i} &gt; b_{T-1, i} - 1) R_i - C_i +
+\mathbb P(Y_{T-1,i} \leq b_{T-1, i} - 1) \mathbb P(Y_{T,i} &gt; b_{T,i} - 1) R_i.
+\]</p>
+<p>A single step of the algorithm then proceeds as follows:</p>
+<ol>
+<li>
+<p>Check if \(N^* = \max_{i} N_{T-1,i}\) is positive. If it&rsquo;s \(\leq 0\), STOP.</p>
+</li>
+<li>
+<p>Set \(i_{best} = \text{argmax}_{i} N_{T-1,i}\). Set \(M_* = \min M_{T-1, i}\), and \(j_{worst} = \text{argmin}_{i} M_{T-1,i}\).</p>
+</li>
+<li>
+<p>If the capacity \(K\) is not reached (i.e. \(\sum_{i=1}^I a_{T-1,i} &lt; K\)), then add \(i_{best}\) to the loading. Set \(a_{T-1,i_{best}} = a_{T-1, i_{best}} + 1\).</p>
+</li>
+<li>
+<p>If the capacity \(K\) is reached, then check if \(N^* &gt; M_*\). If it isn&rsquo;t STOP. Otherwise load \(i_{best}\) and unload \(j_{worst}\); i.e. set \(\hat a_{T-1, i_{best}} = \hat a_{T-1, i_{best}} + 1\) and \(\hat a_{T-1, j_{worst}} = \hat a_{T-1, j_{worst}} - 1\)</p>
+</li>
+</ol>
+<p>After each iteration of this algorithm, if \(N^* \leq 0\), or \(N^* \leq M_*\), we stop completely and move to the next period.</p>
+<p>Otherwise we update the inventory values \(x_{t,i_{best}}\) and \(x_{t, j_{worst}}\) for \(t = T-1, T\) using the new loadings \(\hat a_{T-1, i_{best}}\) and \(\hat a_{T-1, j_{worst}}\). Also update \(N_{T-1, i_{best}}\), \(N_{T-1, j_{worst}}\), \(M_{T-1, i_{best}}\) and \(M_{T-1, i_{worst}}\) given the updated loadings and inventory values. Then we repeat the algorithm above, until either \(N^* \leq 0\), or \(N^* \leq M_*\).</p>
+<p>Moving to time period $t = T-2$ we can follow the exact logic as for $t = T-1$. The difference here will be our marginal rewards. We have
+\[
+N_{T-2,i} = \mathbb P(Y_{T-2,i} &gt; b_{T-2, i}) R_i - C_i
++ \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} &gt; b_{T-1,i}) R_i
++ \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} \leq b_{T-1, i}) \mathbb P(Y_{T,i} &gt; b_{T,i}) R_i.
+\]
+Breaking this down: the additional unit of product \(i\) will either be ordered at time \(T-2\), not ordered at time \(T-2\) but ordered at time \(T-1\), not ordered at time \(T-2, T-1\) but ordered at time \(T\); or not ordered at all because we&rsquo;ve reached the end of the horizon. Similar logic can be used to calculate \(M_{T-2, i}\).</p>
+<p>This procedure can be repeated to time period $t=1$, which will be our required loading for today.</p>
+<h2 id="intuition">
+  Intuition
+  <a class="heading-link" href="#intuition">
+    <i class="fa fa-link" aria-hidden="true"></i>
+  </a>
+</h2>
+<p>The intuition for this heuristic is that the uncertainty in demand has two effects: the uncertainty for that period; the uncertainty of how much inventory will be available in later periods. This heuristic captures how demand affects the uncertainty in each period, but ignores knock-on uncertainty effects on the inventory levels &ndash; replacing it with a deterministic expected value. This should work because we are mainly interested in the first period, so not capturing the inventory uncertainty would hopefully not have a massive effect.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+
+        
+        
+        
+      </footer>
+    </article>
+
+  </section>
+
+      </div>
+
+      
+  <footer class="footer">
+    <section class="container">
+      
+      
+        ©
+        
+        2021
+         Jack Baker 
+      
+      
+         · 
+        Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+      
+      
+    </section>
+  </footer>
+
+
+    </main>
+
+    
+      
+      <script src="/js/coder.min.235666b114443867d43eeb5799d51f6252965e5163f338285e113fa381d3d27e.js" integrity="sha256-I1ZmsRREOGfUPutXmdUfYlKWXlFj8zgoXhE/o4HT0n4="></script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+  </body>
+
+</html>

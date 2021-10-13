@@ -2,11 +2,32 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://jackbakerds.com/posts/inventory-prioritisation/</loc>
+    <lastmod>2021-09-18T18:18:31+01:00</lastmod>
+  </url><url>
     <loc>https://jackbakerds.com/authors/</loc>
-    <lastmod>2021-08-23T20:48:31+01:00</lastmod>
+    <lastmod>2021-09-18T18:18:31+01:00</lastmod>
   </url><url>
     <loc>https://jackbakerds.com/tags/data-science/</loc>
-    <lastmod>2021-08-23T20:48:31+01:00</lastmod>
+    <lastmod>2021-09-18T18:18:31+01:00</lastmod>
+  </url><url>
+    <loc>https://jackbakerds.com/authors/jack-baker/</loc>
+    <lastmod>2021-09-18T18:18:31+01:00</lastmod>
+  </url><url>
+    <loc>https://jackbakerds.com/</loc>
+    <lastmod>2021-09-18T18:18:31+01:00</lastmod>
+  </url><url>
+    <loc>https://jackbakerds.com/tags/machine-learning/</loc>
+    <lastmod>2021-09-18T18:18:31+01:00</lastmod>
+  </url><url>
+    <loc>https://jackbakerds.com/tags/optimisation/</loc>
+    <lastmod>2021-09-18T18:18:31+01:00</lastmod>
+  </url><url>
+    <loc>https://jackbakerds.com/posts/</loc>
+    <lastmod>2021-09-18T18:18:31+01:00</lastmod>
+  </url><url>
+    <loc>https://jackbakerds.com/tags/</loc>
+    <lastmod>2021-09-18T18:18:31+01:00</lastmod>
   </url><url>
     <loc>https://jackbakerds.com/posts/forecasting-feature-selection/</loc>
     <lastmod>2021-08-23T20:48:31+01:00</lastmod>
@@ -14,25 +35,10 @@
     <loc>https://jackbakerds.com/tags/forecasting/</loc>
     <lastmod>2021-08-23T20:48:31+01:00</lastmod>
   </url><url>
-    <loc>https://jackbakerds.com/authors/jack-baker/</loc>
-    <lastmod>2021-08-23T20:48:31+01:00</lastmod>
-  </url><url>
-    <loc>https://jackbakerds.com/</loc>
-    <lastmod>2021-08-23T20:48:31+01:00</lastmod>
-  </url><url>
-    <loc>https://jackbakerds.com/tags/machine-learning/</loc>
-    <lastmod>2021-08-23T20:48:31+01:00</lastmod>
-  </url><url>
-    <loc>https://jackbakerds.com/posts/</loc>
-    <lastmod>2021-08-23T20:48:31+01:00</lastmod>
-  </url><url>
     <loc>https://jackbakerds.com/tags/r/</loc>
     <lastmod>2021-08-23T20:48:31+01:00</lastmod>
   </url><url>
     <loc>https://jackbakerds.com/tags/statistics/</loc>
-    <lastmod>2021-08-23T20:48:31+01:00</lastmod>
-  </url><url>
-    <loc>https://jackbakerds.com/tags/</loc>
     <lastmod>2021-08-23T20:48:31+01:00</lastmod>
   </url><url>
     <loc>https://jackbakerds.com/tags/mlops/</loc>

@@ -1,12 +1,15 @@
 +++ 
-draft = true
+draft = false
 date = 2021-09-18T18:18:31
-title = "Optimising supply chain networks using data science"
-description = "Most inventory optimisation methods tell you how much stock to bring in. But often at the warehouse level there is not enough space, or enough trucks to move it all. In this case you need to prioritise what to bring in, this article explains how."
+title = "A heuristic for prioritising demand planning at lower granularities"
+description = "Most inventory optimisation methods tell you how much stock to bring in at the network level. But often at lower granularities there is not enough space, or enough trucks to move it all. In this case you need to prioritise what to bring in, this article explains how."
 slug = "inventory-prioritisation"
 authors = ["Jack Baker"]
 tags = ["data science", "machine learning", "optimisation"]
 +++
+
+
+Most inventory optimisation methods tell you how much stock to bring in at the network level. But often at lower granularities there is not enough space, or enough trucks to move it all. In this case you need to prioritise what to bring in. This article develops a heuristic to do this.
 
 
 # Why supply chain networks are often strained?
