@@ -169,7 +169,7 @@ x_{t+1,i} = \max\left[x_{1i} + \sum_{s=1}^t \left(\hat a_{si} - \mathbb E(Y_{si}
 N_{T-1,i} = \mathbb P(Y_{T-1,i} &amp;gt; b_{T-1, i}) R_i - C_i +
 \mathbb P(Y_{T-1,i} \leq b_{T-1, i}) \mathbb P(Y_{T,i} &amp;gt; b_{T,i}) R_i.
 \]
-We can break down the parts of the marginal reward as follows: the additional unit of product $i$ will either be ordered at time $T-1$, not ordered at time $T-1$ but ordered at time $T$; or not ordered at all because we&amp;rsquo;ve reached the end of the horizon.&lt;/p&gt;
+We can break down the parts of the marginal reward as follows: the additional unit of product \(i\) will either be ordered at time \(T-1\), not ordered at time \(T-1\) but ordered at time \(T\); or not ordered at all because we&amp;rsquo;ve reached the end of the horizon.&lt;/p&gt;
 &lt;p&gt;Because we&amp;rsquo;ve initialised this problem with the single period algorithm though, our loadings might be full. In this case we can&amp;rsquo;t just add the item with the best marginal reward, we need to swap it with an item in the loading.&lt;/p&gt;
 &lt;p&gt;To do this we can check the marginal cost of removing one unit of one item from the knapsack. This is equivalant to the marginal reward  above replacing \(b_{T-1, i}\) with \(b_{T-1, i} - 1\); i.e.
 \[
@@ -193,14 +193,14 @@ M_{T-1,i} = \mathbb P(Y_{T-1,i} &amp;gt; b_{T-1, i} - 1) R_i - C_i +
 &lt;/ol&gt;
 &lt;p&gt;After each iteration of this algorithm, if \(N^* \leq 0\), or \(N^* \leq M_*\), we stop completely and move to the next period.&lt;/p&gt;
 &lt;p&gt;Otherwise we update the inventory values \(x_{t,i_{best}}\) and \(x_{t, j_{worst}}\) for \(t = T-1, T\) using the new loadings \(\hat a_{T-1, i_{best}}\) and \(\hat a_{T-1, j_{worst}}\). Also update \(N_{T-1, i_{best}}\), \(N_{T-1, j_{worst}}\), \(M_{T-1, i_{best}}\) and \(M_{T-1, i_{worst}}\) given the updated loadings and inventory values. Then we repeat the algorithm above, until either \(N^* \leq 0\), or \(N^* \leq M_*\).&lt;/p&gt;
-&lt;p&gt;Moving to time period $t = T-2$ we can follow the exact logic as for $t = T-1$. The difference here will be our marginal rewards. We have
+&lt;p&gt;Moving to time period \(t = T-2\) we can follow the exact logic as for \(t = T-1\). The difference here will be our marginal rewards. We have
 \[
-N_{T-2,i} = \mathbb P(Y_{T-2,i} &amp;gt; b_{T-2, i}) R_i - C_i
-+ \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} &amp;gt; b_{T-1,i}) R_i
+N_{T-2,i} = \mathbb P(Y_{T-2,i} &amp;gt; b_{T-2, i}) R_i - C_i \&lt;br&gt;
++ \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} &amp;gt; b_{T-1,i}) R_i \&lt;br&gt;
 + \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} \leq b_{T-1, i}) \mathbb P(Y_{T,i} &amp;gt; b_{T,i}) R_i.
 \]
-Breaking this down: the additional unit of product \(i\) will either be ordered at time \(T-2\), not ordered at time \(T-2\) but ordered at time \(T-1\), not ordered at time \(T-2, T-1\) but ordered at time \(T\); or not ordered at all because we&amp;rsquo;ve reached the end of the horizon. Similar logic can be used to calculate \(M_{T-2, i}\).&lt;/p&gt;
-&lt;p&gt;This procedure can be repeated to time period $t=1$, which will be our required loading for today.&lt;/p&gt;
+Breaking this down: the additional unit of product \(i\) will either be ordered at time \(T-2\), not ordered at time \(T-2\) but ordered at time \(T-1\), not ordered at time \(T-2, T-1\) but ordered at time \(T\); or not ordered at all because we&amp;rsquo;ve reached the end of the horizon. Using similar logic, we can calculate \(M_{T-2, i}\).&lt;/p&gt;
+&lt;p&gt;This procedure can be repeated to time period \(t=1\), which will be our required loading for today.&lt;/p&gt;
 &lt;h2 id=&#34;intuition&#34;&gt;
   Intuition
   &lt;a class=&#34;heading-link&#34; href=&#34;#intuition&#34;&gt;

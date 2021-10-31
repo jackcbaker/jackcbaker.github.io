@@ -51,7 +51,13 @@ Now we have a linear model which will allow us to predict the elasticity of our 
 For simplicity though, we will continue with this simple model of elasticity; adding the extensions mentioned does not change the procedure too much, and I will talk about how to add these later.
 
 
-# Bayesian Linear Bandits
+# Bayesian Bandits and Thompson Sampling
 
 
-For our pricing procedure, we essentially need to 
+For our pricing procedure, we essentially need to pick prices that we think will optimise our profit, while also learning about the relationship between price and demand.
+
+A problem like this is known as *exploration versus exploitation*. We could pick a few prices once, observe the corresponding profit, and then just pick the price that was best from then on. The problem with this is that we stop learning about the elasticity. There may be a much more optimal price available, but by random chance it performed badly that time.
+
+Alternatively we could constantly pick different prices to try and learn as much as possible about the relationship between price and profit, then pick the price that worked the best. The problem with this is it takes a long time to learn this relationship, and during this time we won't be getting the best profit possible.
+
+Bandits address this by trying to balance the two competing concepts. Bandit algorithms aim to learn just enough that it can exploit the best price with confidence.

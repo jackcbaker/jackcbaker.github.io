@@ -152,7 +152,7 @@ At period \\(t=T-1\\), we need to look at both the current period, and the perio
     N_{T-1,i} = \mathbb P(Y_{T-1,i} > b_{T-1, i}) R_i - C_i +
     \mathbb P(Y_{T-1,i} \leq b_{T-1, i}) \mathbb P(Y_{T,i} > b_{T,i}) R_i.
 \\]
-We can break down the parts of the marginal reward as follows: the additional unit of product $i$ will either be ordered at time $T-1$, not ordered at time $T-1$ but ordered at time $T$; or not ordered at all because we've reached the end of the horizon.
+We can break down the parts of the marginal reward as follows: the additional unit of product \\(i\\) will either be ordered at time \\(T-1\\), not ordered at time \\(T-1\\) but ordered at time \\(T\\); or not ordered at all because we've reached the end of the horizon.
 
 Because we've initialised this problem with the single period algorithm though, our loadings might be full. In this case we can't just add the item with the best marginal reward, we need to swap it with an item in the loading.
 
@@ -178,15 +178,15 @@ After each iteration of this algorithm, if \\(N^* \leq 0\\), or \\(N^* \leq M_*\
 Otherwise we update the inventory values \\(x_{t,i_{best}}\\) and \\(x_{t, j_{worst}}\\) for \\(t = T-1, T\\) using the new loadings \\(\hat a_{T-1, i_{best}}\\) and \\(\hat a_{T-1, j_{worst}}\\). Also update \\(N_{T-1, i_{best}}\\), \\(N_{T-1, j_{worst}}\\), \\(M_{T-1, i_{best}}\\) and \\(M_{T-1, i_{worst}}\\) given the updated loadings and inventory values. Then we repeat the algorithm above, until either \\(N^* \leq 0\\), or \\(N^* \leq M_*\\).
 
 
-Moving to time period $t = T-2$ we can follow the exact logic as for $t = T-1$. The difference here will be our marginal rewards. We have
+Moving to time period \\(t = T-2\\) we can follow the exact logic as for \\(t = T-1\\). The difference here will be our marginal rewards. We have
 \\[
-    N_{T-2,i} = \mathbb P(Y_{T-2,i} > b_{T-2, i}) R_i - C_i 
-    + \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} > b_{T-1,i}) R_i
+    N_{T-2,i} = \mathbb P(Y_{T-2,i} > b_{T-2, i}) R_i - C_i \\
+    + \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} > b_{T-1,i}) R_i \\
     + \mathbb P(Y_{T-2,i} \leq b_{T-2, i}) \mathbb P(Y_{T-1,i} \leq b_{T-1, i}) \mathbb P(Y_{T,i} > b_{T,i}) R_i.
 \\]
-Breaking this down: the additional unit of product \\(i\\) will either be ordered at time \\(T-2\\), not ordered at time \\(T-2\\) but ordered at time \\(T-1\\), not ordered at time \\(T-2, T-1\\) but ordered at time \\(T\\); or not ordered at all because we've reached the end of the horizon. Similar logic can be used to calculate \\(M_{T-2, i}\\).
+Breaking this down: the additional unit of product \\(i\\) will either be ordered at time \\(T-2\\), not ordered at time \\(T-2\\) but ordered at time \\(T-1\\), not ordered at time \\(T-2, T-1\\) but ordered at time \\(T\\); or not ordered at all because we've reached the end of the horizon. Using similar logic, we can calculate \\(M_{T-2, i}\\).
 
-This procedure can be repeated to time period $t=1$, which will be our required loading for today.
+This procedure can be repeated to time period \\(t=1\\), which will be our required loading for today.
 
 
 ## Intuition
